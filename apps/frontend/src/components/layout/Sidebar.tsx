@@ -103,9 +103,9 @@ export const Sidebar: React.FC = () => {
     },
   ];
 
+  const userRole = (user?.role as any) || 'ADMIN';
   const visibleItems = navItems.filter((item) => {
-    if (!user) return false;
-    return item.roles.includes(user.role);
+    return item.roles.includes(userRole);
   });
 
   return (

@@ -181,13 +181,25 @@ export function initDemoInterceptor() {
       return makeRes({
         success: true,
         data: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          full_name: user.full_name,
+          fullName: user.full_name,
+          pin_code: user.pin_code,
+          pinCode: user.pin_code,
+          phone: user.phone || '+91 98765 43210',
           user: {
             id: user.id,
             username: user.username,
             email: user.email,
             role: user.role,
+            full_name: user.full_name,
             fullName: user.full_name,
+            pin_code: user.pin_code,
             pinCode: user.pin_code,
+            phone: user.phone || '+91 98765 43210',
           },
         },
       });

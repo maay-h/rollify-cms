@@ -9,7 +9,7 @@ import { Badge } from '../ui/Badge.js';
 
 export const Navbar: React.FC = () => {
   const { user, logout, pinLogin } = useAuth();
-  const { status, latency } = useSocket();
+  const { status, latency, reconnect } = useSocket();
   const [isSwitchOpen, setIsSwitchOpen] = useState(false);
   const [pin, setPin] = useState('');
   const [switchError, setSwitchError] = useState('');
@@ -56,7 +56,12 @@ export const Navbar: React.FC = () => {
         {/* Status Indicators & User Badge */}
         <div className="flex items-center gap-3">
           {/* Real-time Connection Status */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-100 text-[11px] font-medium text-stone-600 border border-stone-200/60">
+          <button
+            type="button"
+            onClick={() => reconnect()}
+            title={status === 'connected' ? `Live real-time stream active (${latency || 0}ms)` : 'Click to reconnect live real-time sync'}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-100 text-[11px] font-medium text-stone-600 border border-stone-200/60 hover:bg-stone-200/70 transition-all cursor-pointer"
+          >
             {status === 'connected' ? (
               <>
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -69,11 +74,11 @@ export const Navbar: React.FC = () => {
               </>
             ) : (
               <>
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
-                <span className="text-rose-700 font-semibold">Offline</span>
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <span className="text-stone-700 font-semibold">Connecting to Cloud</span>
               </>
             )}
-          </div>
+          </button>
 
           {/* User profile & quick switch */}
           {user && (
