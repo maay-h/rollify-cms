@@ -25,11 +25,19 @@ class PostgresDatabase implements IDatabase {
   private pool: Pool;
 
   constructor(connectionString: string) {
+    const isCloud = connectionString.includes('sslmode=') ||
+                    connectionString.includes('neon.tech') ||
+                    connectionString.includes('supabase.co') ||
+                    connectionString.includes('render.com') ||
+                    connectionString.includes('railway.app') ||
+                    process.env.NODE_ENV === 'production';
+
     this.pool = new Pool({
       connectionString,
+      ssl: isCloud ? { rejectUnauthorized: false } : undefined,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: 10000,
     });
 
     this.pool.on('error', (err) => {
@@ -156,9 +164,10 @@ let dbInstance: IDatabase;
 
 export function getDatabase(): IDatabase {
   if (!dbInstance) {
-    if (env.DATABASE_URL && env.DATABASE_URL.startsWith('postgresql://')) {
-      console.log('[DB] Connecting to PostgreSQL database via connection string.');
-      dbInstance = new PostgresDatabase(env.DATABASE_URL);
+    const dbUrl = (env.DATABASE_URL || '').trim();
+    if (dbUrl && (dbUrl.startsWith('postgresql://') || dbUrl.startsWith('postgres://'))) {
+      console.log('[DB] Connecting to external PostgreSQL database via connection string.');
+      dbInstance = new PostgresDatabase(dbUrl);
     } else {
       console.log(`[DB] Using embedded PostgreSQL engine (PGlite) with directory: ${env.DATABASE_DATA_DIR}`);
       dbInstance = new PGliteDatabase(env.DATABASE_DATA_DIR);
