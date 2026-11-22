@@ -10,6 +10,9 @@
     "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
     "build": "npm run build --workspaces",
+    "build:backend": "npm run build --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "start:backend": "npm run start:prod --workspace=backend",
     "test": "npm run test --workspaces"
   },
   "keywords": ["pos", "restaurant", "rollify", "inventory", "billing"],

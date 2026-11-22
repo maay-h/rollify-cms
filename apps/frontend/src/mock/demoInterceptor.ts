@@ -87,6 +87,7 @@ function saveStore(store: any) {
 
 export function initDemoInterceptor() {
   const originalFetch = window.fetch;
+  const backendBase = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/$/, '');
 
   window.fetch = async function (input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const urlStr = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
@@ -96,13 +97,22 @@ export function initDemoInterceptor() {
       return originalFetch(input, init);
     }
 
-    // Attempt real backend if on localhost or if a real backend responds with actual JSON
+    // Attempt real backend if VITE_BACKEND_URL is set, or if proxy/localhost responds with JSON
     try {
-      const realRes = await originalFetch(input, init);
+      let fetchTarget: RequestInfo | URL = input;
+      if (backendBase) {
+        if (typeof input === 'string' && input.startsWith('/')) {
+          fetchTarget = `${backendBase}${input}`;
+        } else if (input instanceof URL && input.origin === window.location.origin) {
+          fetchTarget = `${backendBase}${input.pathname}${input.search}`;
+        }
+      }
+
+      const realRes = await originalFetch(fetchTarget, init);
       const ct = realRes.headers.get('content-type') || '';
-      // ONLY return realRes if it is 200 OK AND the content-type is ACTUALLY application/json!
+      // ONLY return realRes if the content-type is ACTUALLY application/json!
       // On Vercel, non-existent /api routes return /index.html with status 200 and text/html!
-      if (realRes.ok && ct.includes('application/json')) {
+      if (ct.includes('application/json')) {
         return realRes;
       }
     } catch (e) {

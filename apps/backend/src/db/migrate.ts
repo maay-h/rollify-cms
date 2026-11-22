@@ -9,7 +9,16 @@ const __dirname = path.dirname(__filename);
 export async function runMigrations() {
   console.log(`[Migration] Starting database migration on engine: ${db.getEngineType()}...`);
   try {
-    const schemaPath = path.resolve(__dirname, 'schema.sql');
+    let schemaPath = path.resolve(__dirname, 'schema.sql');
+    if (!fs.existsSync(schemaPath)) {
+      schemaPath = path.resolve(__dirname, '../../src/db/schema.sql');
+    }
+    if (!fs.existsSync(schemaPath)) {
+      schemaPath = path.resolve(process.cwd(), 'src/db/schema.sql');
+    }
+    if (!fs.existsSync(schemaPath)) {
+      schemaPath = path.resolve(process.cwd(), 'apps/backend/src/db/schema.sql');
+    }
     const sql = fs.readFileSync(schemaPath, 'utf-8');
 
     // Execute multi-statement schema DDL
