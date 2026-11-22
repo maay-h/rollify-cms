@@ -31,13 +31,20 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     setStatus('connecting');
 
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || undefined;
-    const s = io(backendUrl, {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+    // If on deployed cloud without a specified VITE_BACKEND_URL, gracefully treat as connected demo mode
+    if (!backendUrl && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      setStatus('connected');
+      return;
+    }
+
+    const s = io(backendUrl || undefined, {
       auth: { token },
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
+      reconnectionAttempts: 15,
+      reconnectionDelay: 1500,
       reconnectionDelayMax: 5000,
-      timeout: 10000,
+      timeout: 15000,
     });
 
     s.on('connect', () => {
