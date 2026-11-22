@@ -1,0 +1,18 @@
+{
+  "name": "rollify-pos-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rollify Cloud & Terminal POS System",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces"
+  },
+  "keywords": ["pos", "restaurant", "rollify", "inventory", "billing"],
+  "author": "Rollify Team",
+  "license": "UNLICENSED"
+}

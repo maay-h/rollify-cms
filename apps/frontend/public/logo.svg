@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 200" width="100%" height="100%">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.15" />
+    </filter>
+  </defs>
+  <!-- Background wave accent -->
+  <path d="M0,150 Q125,120 250,155 T500,140 L500,200 L0,200 Z" fill="#F59E0B" opacity="0.3" />
+  
+  <g transform="translate(40, 20)">
+    <!-- Chef Hat above R -->
+    <path d="M40,52 C35,42 30,30 45,22 C60,14 75,25 78,22 C82,14 100,16 102,26 C108,24 118,30 114,44 C112,50 102,52 98,54 C94,56 46,56 40,52 Z" 
+          fill="#18181B" stroke="#18181B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Hat band -->
+    <path d="M45,54 C60,56 90,56 98,54" stroke="#C8102E" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Rollify stylized text in Brand Gold -->
+    <!-- Stylized 'R' -->
+    <path d="M38,65 L76,65 C92,65 104,74 104,88 C104,100 94,107 82,110 L108,142 L82,142 L60,115 L56,115 L56,142 L38,142 Z M56,80 L56,101 L74,101 C82,101 88,97 88,90 C88,84 82,80 74,80 Z" fill="#F59E0B" />
+    
+    <!-- Stylized 'o' with Swirl Roll -->
+    <circle cx="132" cy="115" r="26" fill="#F59E0B" />
+    <circle cx="132" cy="115" r="16" fill="#C8102E" />
+    <!-- Swirl center -->
+    <path d="M132,105 C138,105 142,110 142,115 C142,121 137,125 132,125 C126,125 122,120 123,115 C124,111 128,109 131,110 C133,111 134,113 133,115" 
+          fill="none" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" />
+
+    <!-- 'l' -->
+    <rect x="170" y="65" width="16" height="77" rx="6" fill="#F59E0B" />
+    
+    <!-- 'l' -->
+    <rect x="194" y="65" width="16" height="77" rx="6" fill="#F59E0B" />
+    
+    <!-- 'i' with dot -->
+    <circle cx="226" cy="72" r="8" fill="#F59E0B" />
+    <rect x="218" y="88" width="16" height="54" rx="6" fill="#F59E0B" />
+
+    <!-- 'f' -->
+    <path d="M256,65 C244,65 238,72 238,84 L238,142 L254,142 L254,104 L268,104 L268,88 L254,88 L254,82 C254,78 257,76 262,76 L268,76 L268,65 Z" fill="#F59E0B" />
+
+    <!-- 'y' -->
+    <path d="M272,88 L288,88 L298,120 L308,88 L324,88 L306,138 C300,154 290,160 276,160 L270,160 L270,146 L274,146 C282,146 287,142 291,132 Z" fill="#F59E0B" />
+    
+    <!-- Tagline capsule badge: 'A community of flavours' -->
+    <rect x="145" y="160" width="220" height="24" rx="12" fill="none" stroke="#18181B" stroke-width="2" />
+    <text x="255" y="176" font-family="'Inter', sans-serif" font-weight="700" font-size="11" fill="#18181B" text-anchor="middle" letter-spacing="1">A COMMUNITY OF FLAVOURS</text>
+  </g>
+</svg>
