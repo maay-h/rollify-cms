@@ -15,8 +15,8 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (identifier: string, pass: string) => Promise<{ success: boolean; error?: string }>;
-  pinLogin: (pin: string) => Promise<{ success: boolean; error?: string }>;
+  login: (identifier: string, pass: string) => Promise<{ success: boolean; role?: UserRole; error?: string }>;
+  pinLogin: (pin: string) => Promise<{ success: boolean; role?: UserRole; error?: string }>;
   logout: () => Promise<void>;
   hasRole: (...roles: UserRole[]) => boolean;
 }
@@ -108,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(newToken);
       setUser(newUser);
 
-      return { success: true };
+      return { success: true, role: newUser.role };
     } catch (err: any) {
       return { success: false, error: err.message || 'Network connection error' };
     }
@@ -143,7 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(newToken);
       setUser(newUser);
 
-      return { success: true };
+      return { success: true, role: newUser.role };
     } catch (err: any) {
       return { success: false, error: err.message || 'Network error' };
     }

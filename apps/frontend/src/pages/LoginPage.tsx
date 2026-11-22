@@ -18,10 +18,29 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // If already logged in, redirect to dashboard
+  const navigateByRole = (role?: UserRole) => {
+    switch (role) {
+      case 'KITCHEN':
+        navigate('/kitchen');
+        break;
+      case 'WAITER':
+        navigate('/pos');
+        break;
+      case 'CASHIER':
+        navigate('/billing');
+        break;
+      case 'MANAGER':
+      case 'ADMIN':
+      default:
+        navigate('/dashboard');
+        break;
+    }
+  };
+
+  // If already logged in, redirect to role-specific home
   React.useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      navigateByRole(user.role);
     }
   }, [user, navigate]);
 
@@ -38,7 +57,7 @@ export const LoginPage: React.FC = () => {
     setIsLoading(false);
 
     if (res.success) {
-      navigate('/dashboard');
+      navigateByRole(res.role);
     } else {
       setError(res.error || 'Authentication failed');
     }
@@ -55,7 +74,7 @@ export const LoginPage: React.FC = () => {
       const res = await pinLogin(newPin);
       setIsLoading(false);
       if (res.success) {
-        navigate('/dashboard');
+        navigateByRole(res.role);
       } else {
         setError(res.error || 'Invalid PIN code');
         setPin('');
@@ -74,12 +93,12 @@ export const LoginPage: React.FC = () => {
     const res = await pinLogin(staffPin);
     setIsLoading(false);
     if (res.success) {
-      navigate('/dashboard');
+      navigateByRole(res.role);
     } else {
       // Fallback to password login
       const pRes = await login(staffUser, `${staffUser}123`);
       if (pRes.success) {
-        navigate('/dashboard');
+        navigateByRole(pRes.role);
       } else {
         setError(pRes.error || 'Quick staff sign-in failed');
       }

@@ -141,7 +141,11 @@ export function initDemoInterceptor() {
 
     // 2. AUTH
     if (path === '/api/auth/pin-login' && method === 'POST') {
-      const user = store.users.find((u: any) => u.pin_code === body.pinCode) || store.users[0];
+      const pinToMatch = (body.pin || body.pinCode || '').toString().trim();
+      const user = store.users.find((u: any) => u.pin_code === pinToMatch);
+      if (!user) {
+        return makeRes({ success: false, error: 'Invalid PIN code. Try 1111, 2222, 3333, 4444, or 5555.' }, 401);
+      }
       return makeRes({
         success: true,
         data: {
@@ -152,6 +156,7 @@ export function initDemoInterceptor() {
             role: user.role,
             fullName: user.full_name,
             pinCode: user.pin_code,
+            phone: user.phone,
           },
           token: `demo-token-${user.role.toLowerCase()}-${Date.now()}`,
         },
@@ -159,7 +164,14 @@ export function initDemoInterceptor() {
     }
 
     if (path === '/api/auth/login' && method === 'POST') {
-      const user = store.users.find((u: any) => u.username === body.identifier || u.email === body.identifier) || store.users[0];
+      const id = (body.identifier || '').toString().trim().toLowerCase();
+      const user = store.users.find((u: any) => 
+        (u.username && u.username.toLowerCase() === id) || 
+        (u.email && u.email.toLowerCase() === id)
+      );
+      if (!user) {
+        return makeRes({ success: false, error: 'Invalid username/email or password' }, 401);
+      }
       return makeRes({
         success: true,
         data: {
@@ -170,6 +182,7 @@ export function initDemoInterceptor() {
             role: user.role,
             fullName: user.full_name,
             pinCode: user.pin_code,
+            phone: user.phone,
           },
           token: `demo-token-${user.role.toLowerCase()}-${Date.now()}`,
         },

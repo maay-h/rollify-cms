@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Wifi, WifiOff, LogOut, KeyRound, Shield, Clock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { useSocket } from '../../context/SocketContext.js';
@@ -10,6 +11,7 @@ import { Badge } from '../ui/Badge.js';
 export const Navbar: React.FC = () => {
   const { user, logout, pinLogin } = useAuth();
   const { status, latency, reconnect } = useSocket();
+  const navigate = useNavigate();
   const [isSwitchOpen, setIsSwitchOpen] = useState(false);
   const [pin, setPin] = useState('');
   const [switchError, setSwitchError] = useState('');
@@ -25,6 +27,22 @@ export const Navbar: React.FC = () => {
     if (res.success) {
       setIsSwitchOpen(false);
       setPin('');
+      switch (res.role) {
+        case 'KITCHEN':
+          navigate('/kitchen');
+          break;
+        case 'WAITER':
+          navigate('/pos');
+          break;
+        case 'CASHIER':
+          navigate('/billing');
+          break;
+        case 'MANAGER':
+        case 'ADMIN':
+        default:
+          navigate('/dashboard');
+          break;
+      }
     } else {
       setSwitchError(res.error || 'Invalid PIN');
     }
