@@ -9,13 +9,16 @@ import {
   DEMO_INITIAL_ORDERS 
 } from './demoStore.js';
 
-const STORAGE_KEY = 'rollify_pos_demo_db_v1';
+const STORAGE_KEY = 'rollify_pos_demo_db_v3';
 
 function getStore() {
   const existing = localStorage.getItem(STORAGE_KEY);
   if (existing) {
     try {
-      return JSON.parse(existing);
+      const parsed = JSON.parse(existing);
+      if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+        return parsed;
+      }
     } catch {
       // fallback
     }
@@ -93,12 +96,13 @@ export function initDemoInterceptor() {
       return originalFetch(input, init);
     }
 
-    // Attempt real backend if on localhost or if VITE_BACKEND_URL is set
+    // Attempt real backend if on localhost or if a real backend responds with actual JSON
     try {
       const realRes = await originalFetch(input, init);
-      // If real backend responds with valid JSON (not 404/html)
       const ct = realRes.headers.get('content-type') || '';
-      if (realRes.ok || (ct.includes('application/json') && realRes.status !== 404)) {
+      // ONLY return realRes if it is 200 OK AND the content-type is ACTUALLY application/json!
+      // On Vercel, non-existent /api routes return /index.html with status 200 and text/html!
+      if (realRes.ok && ct.includes('application/json')) {
         return realRes;
       }
     } catch (e) {
@@ -203,14 +207,34 @@ export function initDemoInterceptor() {
       return makeRes({ success: true, data: store.categories });
     }
 
-    if (path === '/api/menu/items') {
+    if (path === '/api/menu/items' && method === 'GET') {
       return makeRes({ success: true, data: store.items });
     }
 
-    if (path.startsWith('/api/menu/items/')) {
+    if (path.startsWith('/api/menu/items/') && path.endsWith('/availability') && method === 'PATCH') {
       const itemId = path.split('/')[4];
       const item = store.items.find((i: any) => i.id === itemId);
+      if (item) {
+        item.is_available = !item.is_available;
+        saveStore(store);
+      }
       return makeRes({ success: true, data: item });
+    }
+
+    if (path.startsWith('/api/menu/items/') && method === 'GET') {
+      const itemId = path.split('/')[4];
+      const item = store.items.find((i: any) => i.id === itemId);
+      return makeRes({
+        success: true,
+        data: {
+          ...item,
+          recipe: [
+            { id: 'r1', ingredient_name: 'Handcrafted Paratha Wrap', quantity: '1', unit: 'pcs', current_stock: '450', ingredient_unit: 'pcs' },
+            { id: 'r2', ingredient_name: 'Fresh Boneless Chicken / Paneer', quantity: '0.12', unit: 'kg', current_stock: '48', ingredient_unit: 'kg' },
+            { id: 'r3', ingredient_name: 'House Toum Garlic Mayo', quantity: '0.03', unit: 'l', current_stock: '22', ingredient_unit: 'l' },
+          ],
+        },
+      });
     }
 
     // 5. ORDERS
