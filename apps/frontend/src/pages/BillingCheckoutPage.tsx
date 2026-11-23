@@ -23,7 +23,8 @@ import {
   Clock, 
   ShieldCheck, 
   ArrowRight,
-  TrendingUp
+  TrendingUp,
+  RotateCcw
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -92,6 +93,45 @@ export const BillingCheckoutPage: React.FC = () => {
   // Receipt Preview
   const [previewBill, setPreviewBill] = useState<BillDetail | null>(null);
   const [receiptOpen, setReceiptOpen] = useState(false);
+
+  // Refund / Void State
+  const [refundBill, setRefundBill] = useState<BillListItem | null>(null);
+  const [refundReason, setRefundReason] = useState<string>('Customer Request');
+  const [refundNotes, setRefundNotes] = useState<string>('');
+  const [isProcessingRefund, setIsProcessingRefund] = useState(false);
+
+  // Process Refund Submission
+  const handleProcessRefund = async () => {
+    if (!refundBill) return;
+    setIsProcessingRefund(true);
+    try {
+      const res = await fetch(`/api/billing/${refundBill.id}/refund`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          reason: refundReason,
+          notes: refundNotes || undefined,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success('Invoice Refunded', 'Invoice has been voided and marked as refunded.');
+        setRefundBill(null);
+        setRefundReason('Customer Request');
+        setRefundNotes('');
+        await fetchBillingData();
+      } else {
+        toast.error('Refund Failed', json.error || 'Could not process refund');
+      }
+    } catch (err: any) {
+      toast.error('Refund Failed', err.message);
+    } finally {
+      setIsProcessingRefund(false);
+    }
+  };
 
   const fetchBillingData = async () => {
     try {
@@ -474,7 +514,7 @@ export const BillingCheckoutPage: React.FC = () => {
                         </td>
                         <td className="py-3 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            {bill.payment_status !== 'PAID' && (
+                            {bill.payment_status !== 'PAID' && bill.payment_status !== 'REFUNDED' && (
                               <Button
                                 variant="primary"
                                 size="sm"
@@ -482,6 +522,21 @@ export const BillingCheckoutPage: React.FC = () => {
                                 onClick={() => openPaymentModal(bill)}
                               >
                                 Tender Pay
+                              </Button>
+                            )}
+                            {bill.payment_status === 'PAID' && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                title="Issue Refund & Void Invoice"
+                                className="text-xs h-7 py-0 px-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200"
+                                onClick={() => {
+                                  setRefundBill(bill);
+                                  setRefundReason('Customer Request');
+                                  setRefundNotes('');
+                                }}
+                              >
+                                <RotateCcw className="w-3.5 h-3.5" />
                               </Button>
                             )}
                             <Button
@@ -565,10 +620,64 @@ export const BillingCheckoutPage: React.FC = () => {
           </div>
 
           {/* Tender Amount Input (For Partial or Split Payment) */}
-          <div className="space-y-1">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-stone-600">
-              Amount to Tender (₹)
-            </label>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-600">
+                Amount to Tender (₹)
+              </label>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const bal = Number(selectedBill?.balance_due || 0);
+                    setTenderAmount(bal);
+                    setTenderedCash(bal);
+                  }}
+                  className="px-2 py-0.5 rounded text-[10px] font-bold bg-stone-100 hover:bg-stone-200 text-stone-700 transition"
+                >
+                  Full (100%)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const bal = Number(selectedBill?.balance_due || 0);
+                    const split = Math.round((bal / 2) * 100) / 100;
+                    setTenderAmount(split);
+                    setTenderedCash(split);
+                    setPaymentMethod('SPLIT');
+                  }}
+                  className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/60 transition"
+                >
+                  Split 2-Way
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const bal = Number(selectedBill?.balance_due || 0);
+                    const split = Math.round((bal / 3) * 100) / 100;
+                    setTenderAmount(split);
+                    setTenderedCash(split);
+                    setPaymentMethod('SPLIT');
+                  }}
+                  className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/60 transition"
+                >
+                  Split 3-Way
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const bal = Number(selectedBill?.balance_due || 0);
+                    const split = Math.round((bal / 4) * 100) / 100;
+                    setTenderAmount(split);
+                    setTenderedCash(split);
+                    setPaymentMethod('SPLIT');
+                  }}
+                  className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/60 transition"
+                >
+                  Split 4-Way
+                </button>
+              </div>
+            </div>
             <input
               type="number"
               step="0.01"
@@ -646,6 +755,84 @@ export const BillingCheckoutPage: React.FC = () => {
               leftIcon={<CheckCircle2 className="w-4 h-4" />}
             >
               Confirm Payment (₹{tenderAmount.toFixed(2)})
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Refund / Void Invoice Modal */}
+      <Modal
+        isOpen={Boolean(refundBill)}
+        onClose={() => setRefundBill(null)}
+        maxWidth="sm"
+        title={
+          <div className="flex items-center gap-2 text-rose-600">
+            <RotateCcw className="w-5 h-5" />
+            <span>Issue Refund & Void Invoice</span>
+          </div>
+        }
+      >
+        <div className="space-y-4 py-2">
+          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs space-y-1">
+            <div className="flex justify-between font-bold text-rose-900">
+              <span>Invoice #{refundBill?.bill_number}</span>
+              <span className="font-mono">₹{refundBill?.net_amount}</span>
+            </div>
+            <p className="text-rose-700">
+              This will record a refund transaction, mark the invoice as REFUNDED, and cancel the order.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-stone-700">
+              Select Reason for Refund *
+            </label>
+            <select
+              value={refundReason}
+              onChange={(e) => setRefundReason(e.target.value)}
+              className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:border-rose-500"
+            >
+              <option value="Customer Request">Customer Changed Mind / Requested Refund</option>
+              <option value="Order Quality Issue">Food Quality or Taste Issue</option>
+              <option value="Wrong Item Prepared">Wrong Item Prepared / Kitchen Error</option>
+              <option value="Accidental Duplicate">Accidental Duplicate Billing</option>
+              <option value="Item Out of Stock">Item Out of Stock</option>
+              <option value="Other">Other Administrative Adjustment</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-stone-700">
+              Authorization Notes (Optional)
+            </label>
+            <textarea
+              rows={2}
+              value={refundNotes}
+              onChange={(e) => setRefundNotes(e.target.value)}
+              placeholder="e.g. Authorized by Shift Supervisor"
+              className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:border-rose-500"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t border-stone-100">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setRefundBill(null)}
+              disabled={isProcessingRefund}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              size="sm"
+              isLoading={isProcessingRefund}
+              onClick={handleProcessRefund}
+              leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+            >
+              Confirm Refund (₹{refundBill?.net_amount})
             </Button>
           </div>
         </div>

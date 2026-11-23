@@ -341,6 +341,43 @@ export function initDemoInterceptor() {
       });
     }
 
+    if (path.startsWith('/api/orders/') && path.endsWith('/items') && method === 'POST') {
+      const orderId = path.split('/')[3];
+      const ord = store.orders.find((o: any) => o.id === orderId);
+      if (ord) {
+        const newItems = (body.items || []).map((it: any, idx: number) => {
+          const itemObj = store.items.find((m: any) => m.id === it.menuItemId);
+          const itemSubtotal = it.quantity * it.unitPrice;
+          return {
+            id: `oit-${orderId}-${Date.now()}-${idx + 1}`,
+            order_id: orderId,
+            menu_item_id: it.menuItemId,
+            item_name: itemObj?.name || 'Cafe Item',
+            variant_name: it.variantName || 'Regular',
+            quantity: it.quantity,
+            unit_price: it.unitPrice.toFixed(2),
+            subtotal: itemSubtotal.toFixed(2),
+            item_status: body.sendToKitchen ? 'SENT_TO_KITCHEN' : 'CREATED',
+            is_veg: itemObj?.is_veg ?? true,
+            prep_time_minutes: itemObj?.prep_time_minutes ?? 6,
+            special_instructions: it.specialInstructions || '',
+          };
+        });
+
+        ord.items = [...(ord.items || []), ...newItems];
+        const subtotal = ord.items.reduce((acc: number, item: any) => acc + Number(item.subtotal || 0), 0);
+        const parcel = (ord.order_type === 'TAKEAWAY' || ord.order_type === 'DELIVERY') ? 10 : 0;
+        const gst = (subtotal + parcel) * 0.05;
+        ord.total_amount = (subtotal + parcel + gst).toFixed(2);
+        if (body.sendToKitchen && ord.status !== 'PREPARING') {
+          ord.status = 'SENT_TO_KITCHEN';
+        }
+        saveStore(store);
+        return makeRes({ success: true, message: 'Items added to order', data: ord });
+      }
+      return makeRes({ success: false, error: 'Order not found' }, 404);
+    }
+
     if (path === '/api/orders/kitchen/active') {
       const activeTickets = store.orders.filter((o: any) =>
         ['SENT_TO_KITCHEN', 'PREPARING', 'READY'].includes(o.status)
@@ -413,24 +450,60 @@ export function initDemoInterceptor() {
       const billId = path.split('/')[3];
       const bill = store.bills.find((b: any) => b.id === billId);
       if (bill) {
-        const paymentsList = body.payments || [];
-        bill.payments = [...bill.payments, ...paymentsList.map((p: any) => ({ ...p, id: `pay-${Date.now()}` }))];
-        const totalPaid = bill.payments.reduce((acc: number, p: any) => acc + Number(p.amount), 0);
+        let paymentsList = body.payments || [];
+        if (!paymentsList.length && body.paymentMethod) {
+          paymentsList = [{
+            id: `pay-${Date.now()}`,
+            amount: body.amount,
+            payment_method: body.paymentMethod,
+            transaction_reference: body.transactionReference || '',
+            created_at: new Date().toISOString(),
+          }];
+        }
+        bill.payments = [...(bill.payments || []), ...paymentsList.map((p: any) => ({ ...p, id: p.id || `pay-${Date.now()}` }))];
+        const totalPaid = bill.payments.reduce((acc: number, p: any) => acc + Number(p.amount || 0), 0);
         bill.paid_amount = totalPaid.toFixed(2);
-        bill.balance_due = Math.max(0, Number(bill.net_amount) - totalPaid);
-        bill.payment_status = bill.balance_due <= 0 ? 'PAID' : 'PARTIALLY_PAID';
+        bill.balance_due = Math.max(0, Math.round((Number(bill.net_amount) - totalPaid) * 100) / 100);
+        bill.payment_status = bill.balance_due <= 0.05 ? 'PAID' : 'PARTIALLY_PAID';
 
         // complete the corresponding order
         const order = store.orders.find((o: any) => o.id === bill.order_id);
         if (order && bill.payment_status === 'PAID') {
           order.status = 'COMPLETED';
           const table = store.tables.find((t: any) => t.id === order.table_id);
-          if (table) table.status = 'AVAILABLE';
+          if (table) {
+            table.status = 'AVAILABLE';
+            table.active_order_id = null;
+          }
         }
 
         saveStore(store);
       }
-      return makeRes({ success: true, data: bill });
+      return makeRes({ success: true, message: 'Payment recorded successfully', data: bill });
+    }
+
+    if (path.startsWith('/api/billing/') && path.endsWith('/refund') && method === 'POST') {
+      const billId = path.split('/')[3];
+      const bill = store.bills.find((b: any) => b.id === billId);
+      if (bill) {
+        bill.payment_status = 'REFUNDED';
+        bill.refund_reason = body.reason || 'Staff void / refund';
+        bill.refunded_at = new Date().toISOString();
+
+        const order = store.orders.find((o: any) => o.id === bill.order_id);
+        if (order) {
+          order.status = 'CANCELLED';
+          const table = store.tables.find((t: any) => t.id === order.table_id);
+          if (table) {
+            table.status = 'AVAILABLE';
+            table.active_order_id = null;
+          }
+        }
+
+        saveStore(store);
+        return makeRes({ success: true, message: 'Invoice refunded and order cancelled', data: bill });
+      }
+      return makeRes({ success: false, error: 'Bill not found' }, 404);
     }
 
     if (path.startsWith('/api/billing/') && method === 'GET' && !path.includes('day-close')) {

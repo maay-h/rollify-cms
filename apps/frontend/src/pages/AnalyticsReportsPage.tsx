@@ -20,7 +20,9 @@ import {
   Layers, 
   ShoppingBag, 
   Utensils, 
-  CreditCard 
+  CreditCard,
+  Download,
+  Printer
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -119,6 +121,78 @@ export const AnalyticsReportsPage: React.FC = () => {
     }
   };
 
+  const handleExportCSV = () => {
+    if (!pnl) {
+      toast.warning('No Data', 'No financial data available to export');
+      return;
+    }
+
+    const lines: string[] = [];
+    lines.push('ROLLIFY CAFE - FINANCIAL & SALES REPORT');
+    lines.push(`Generated At,${new Date().toLocaleString()}`);
+    lines.push(`Filter Range,${startDate || 'All Time'} to ${endDate || 'Present'}`);
+    lines.push('');
+
+    // P&L Summary
+    lines.push('EXECUTIVE PROFIT & LOSS SUMMARY');
+    lines.push('Metric,Amount (INR)');
+    lines.push(`Gross Revenue,${pnl.revenue.grossRevenue.toFixed(2)}`);
+    lines.push(`Discounts Given,${pnl.revenue.discounts.toFixed(2)}`);
+    lines.push(`Taxable Sales,${pnl.revenue.taxableSales.toFixed(2)}`);
+    lines.push(`GST Collected (5%),${pnl.revenue.gstCollected.toFixed(2)}`);
+    lines.push(`Total Collected,${pnl.revenue.totalCollected.toFixed(2)}`);
+    lines.push(`Settled Invoices Count,${pnl.revenue.invoiceCount}`);
+    lines.push(`Raw Ingredient COGS,${pnl.costOfSales.cogs.toFixed(2)}`);
+    lines.push(`Wastage Cost,${pnl.costOfSales.wastageCost.toFixed(2)}`);
+    lines.push(`Total Operating Expenses,${pnl.operatingExpenses.totalOperatingExpenses.toFixed(2)}`);
+    lines.push(`Net Profit,${pnl.netProfit.amount.toFixed(2)}`);
+    lines.push(`Net Profit Margin,${pnl.netProfit.marginPercent.toFixed(1)}%`);
+    lines.push('');
+
+    // Sales by Category
+    if (breakdown?.byCategory?.length) {
+      lines.push('SALES BY CATEGORY');
+      lines.push('Category,Units Sold,Total Revenue (INR)');
+      breakdown.byCategory.forEach((cat) => {
+        lines.push(`"${cat.category_name}",${cat.units_sold},${cat.total_revenue}`);
+      });
+      lines.push('');
+    }
+
+    // Top Selling Dishes
+    if (breakdown?.topSellingDishes?.length) {
+      lines.push('TOP SELLING DISHES');
+      lines.push('Dish Name,Category,Diet,Quantity Sold,Total Volume (INR)');
+      breakdown.topSellingDishes.forEach((d) => {
+        lines.push(`"${d.item_name}","${d.category_name}",${d.is_veg ? 'VEG' : 'NON-VEG'},${d.total_quantity_sold},${d.total_sales_volume}`);
+      });
+      lines.push('');
+    }
+
+    // Payment Methods
+    if (breakdown?.byPaymentMethod?.length) {
+      lines.push('PAYMENTS COLLECTED BY TENDER METHOD');
+      lines.push('Payment Method,Transactions,Total Amount (INR)');
+      breakdown.byPaymentMethod.forEach((pm) => {
+        lines.push(`${pm.payment_method},${pm.transaction_count},${pm.total_amount}`);
+      });
+      lines.push('');
+    }
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
+    const link = document.createElement('a');
+    link.setAttribute('href', csvContent);
+    link.setAttribute('download', `Rollify_Cafe_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Report Exported', 'CSV financial report downloaded successfully');
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -134,7 +208,7 @@ export const AnalyticsReportsPage: React.FC = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-stone-200/80 shadow-xs">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-stone-200/80 shadow-xs print:hidden">
         <div>
           <div className="flex items-center gap-2.5">
             <div className="p-2 bg-rollify-red-50 text-rollify-red rounded-xl">
@@ -149,7 +223,7 @@ export const AnalyticsReportsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Input
             type="date"
             value={startDate}
@@ -164,7 +238,29 @@ export const AnalyticsReportsPage: React.FC = () => {
             className="w-36 text-xs"
           />
           <Button size="sm" variant="primary" onClick={fetchData}>
-            Apply Filter
+            Apply
+          </Button>
+
+          <div className="h-6 w-px bg-stone-200 mx-1 hidden sm:block" />
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleExportCSV}
+            leftIcon={<Download className="w-3.5 h-3.5" />}
+            title="Download full P&L and category report as CSV / Excel"
+          >
+            Export CSV
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handlePrint}
+            leftIcon={<Printer className="w-3.5 h-3.5" />}
+            title="Print executive summary statement"
+          >
+            Print
           </Button>
         </div>
       </div>

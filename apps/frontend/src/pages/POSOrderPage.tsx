@@ -19,7 +19,12 @@ import {
   Flame, 
   ChefHat, 
   Check, 
-  Receipt 
+  Receipt,
+  MessageSquare,
+  Sparkles,
+  Coffee,
+  CupSoda,
+  Tag
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -39,6 +44,7 @@ interface MenuItem {
   is_veg: boolean;
   is_chef_special?: boolean;
   is_spicy?: boolean;
+  image_url?: string;
   prep_time_minutes: number;
   variants?: MenuItemVariant[];
 }
@@ -53,6 +59,7 @@ interface CartItem {
   quantity: number;
   notes?: string;
   isVeg: boolean;
+  imageUrl?: string;
 }
 
 interface DiningTable {
@@ -60,7 +67,23 @@ interface DiningTable {
   table_number: string;
   section: string;
   status: string;
+  active_order_id?: string;
+  active_order_number?: string;
 }
+
+const SPECIAL_INSTRUCTION_PRESETS = [
+  'Extra Sugar',
+  'Less Sugar',
+  'No Sugar',
+  'Extra Shot',
+  'Less Spicy',
+  'Extra Spicy',
+  'No Onion',
+  'Extra Cheese',
+  'Less Ice',
+  'Oat Milk',
+  'Serve Hot',
+];
 
 export const POSOrderPage: React.FC = () => {
   const { token, user } = useAuth();
@@ -86,8 +109,10 @@ export const POSOrderPage: React.FC = () => {
   const [orderNotes, setOrderNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Variant Selection Modal
+  // Variant & Customization Modal State
   const [variantModalItem, setVariantModalItem] = useState<MenuItem | null>(null);
+  const [editingCartItem, setEditingCartItem] = useState<CartItem | null>(null);
+  const [itemNoteInput, setItemNoteInput] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -106,7 +131,7 @@ export const POSOrderPage: React.FC = () => {
         if (itemsJson.data) setMenuItems(itemsJson.data);
         if (tablesJson.data) {
           setTables(tablesJson.data);
-          // Auto select first available table if dine-in
+          // Auto-select first available table if dine-in
           const firstAvail = tablesJson.data.find((t: DiningTable) => t.status === 'AVAILABLE');
           if (firstAvail) setSelectedTableId(firstAvail.id);
         }
@@ -120,13 +145,15 @@ export const POSOrderPage: React.FC = () => {
     fetchData();
   }, [token]);
 
+  // Selected table info
+  const selectedTable = tables.find((t) => t.id === selectedTableId);
+  const isSelectedTableOccupied = selectedTable?.status === 'OCCUPIED';
+
   // Add Item to Cart
   const handleItemClick = (item: MenuItem) => {
-    // If item has multiple size variants, prompt size selection modal
     if (item.variants && item.variants.length > 1) {
       setVariantModalItem(item);
     } else {
-      // Single price item
       const price = Number(item.price);
       addToCart(item, undefined, undefined, price);
     }
@@ -136,11 +163,12 @@ export const POSOrderPage: React.FC = () => {
     item: MenuItem,
     variantId?: string,
     variantName?: string,
-    unitPrice: number = Number(item.price)
+    unitPrice: number = Number(item.price),
+    notes?: string
   ) => {
     setCart((prev) => {
       const existingIdx = prev.findIndex(
-        (c) => c.menuItemId === item.id && c.variantName === (variantName || 'Single')
+        (c) => c.menuItemId === item.id && c.variantName === (variantName || 'Single') && c.notes === notes
       );
 
       if (existingIdx >= 0) {
@@ -159,12 +187,14 @@ export const POSOrderPage: React.FC = () => {
           variantName: variantName || 'Single',
           unitPrice,
           quantity: 1,
+          notes: notes || '',
           isVeg: item.is_veg,
+          imageUrl: item.image_url,
         },
       ];
     });
 
-    toast.info(`Added to Order`, `${item.name} ${variantName ? `(${variantName})` : ''}`);
+    toast.info(`Added to Cart`, `${item.name} ${variantName ? `(${variantName})` : ''}`);
     setVariantModalItem(null);
   };
 
@@ -182,10 +212,28 @@ export const POSOrderPage: React.FC = () => {
     );
   };
 
-  const updateItemNotes = (cartId: string, notes: string) => {
+  const openItemInstructions = (item: CartItem) => {
+    setEditingCartItem(item);
+    setItemNoteInput(item.notes || '');
+  };
+
+  const saveItemInstructions = () => {
+    if (!editingCartItem) return;
     setCart((prev) =>
-      prev.map((item) => (item.cartId === cartId ? { ...item, notes } : item))
+      prev.map((c) => (c.cartId === editingCartItem.cartId ? { ...c, notes: itemNoteInput.trim() } : c))
     );
+    setEditingCartItem(null);
+    setItemNoteInput('');
+    toast.success('Customization Updated', 'Special instructions saved to item');
+  };
+
+  const togglePresetInstruction = (preset: string) => {
+    const existing = itemNoteInput.split(',').map((s) => s.trim()).filter(Boolean);
+    if (existing.includes(preset)) {
+      setItemNoteInput(existing.filter((s) => s !== preset).join(', '));
+    } else {
+      setItemNoteInput([...existing, preset].join(', '));
+    }
   };
 
   // Calculations
@@ -198,7 +246,7 @@ export const POSOrderPage: React.FC = () => {
   // Submit Order
   const submitOrder = async (sendDirectlyToKitchen: boolean) => {
     if (cart.length === 0) {
-      toast.warning('Empty Cart', 'Please add at least one item before placing order');
+      toast.warning('Empty Cart', 'Please add at least one item before submitting');
       return;
     }
 
@@ -209,6 +257,41 @@ export const POSOrderPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
+      // Check if appending to existing active table order
+      if (orderType === 'DINE_IN' && selectedTable?.status === 'OCCUPIED' && selectedTable.active_order_id) {
+        const payload = {
+          items: cart.map((it) => ({
+            menuItemId: it.menuItemId,
+            variantId: it.variantId,
+            variantName: it.variantName,
+            quantity: it.quantity,
+            unitPrice: it.unitPrice,
+            notes: it.notes,
+          })),
+        };
+
+        const res = await fetch(`/api/orders/${selectedTable.active_order_id}/items`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          toast.success(
+            'Added to Table Order!',
+            `Items added to ${selectedTable.table_number}. Kitchen notified.`
+          );
+          setCart([]);
+          navigate('/orders');
+          return;
+        }
+      }
+
+      // Standard New Order Placement
       const payload = {
         orderType,
         tableId: orderType === 'DINE_IN' ? selectedTableId : null,
@@ -238,10 +321,9 @@ export const POSOrderPage: React.FC = () => {
       const json = await res.json();
       if (json.success) {
         toast.success(
-          sendDirectlyToKitchen ? 'Dispatched to Kitchen!' : 'Order Saved (Draft)',
-          `Order ${json.data.orderNumber} successfully logged`
+          sendDirectlyToKitchen ? 'Dispatched to Kitchen!' : 'Order Logged (Draft)',
+          `Order ${json.data.orderNumber} successfully created`
         );
-        // Clear cart
         setCart([]);
         setCustomerName('');
         setCustomerPhone('');
@@ -265,51 +347,52 @@ export const POSOrderPage: React.FC = () => {
   });
 
   if (loading) {
-    return <LoadingSpinner text="Starting Rollify Fast Order POS Terminal..." />;
+    return <LoadingSpinner text="Loading Cafe POS Order Terminal..." />;
   }
 
   return (
     <div className="flex flex-col xl:flex-row gap-6 max-w-[1700px] mx-auto h-[calc(100vh-100px)]">
       {/* LEFT: Menu Browsing & Item Selection (70% width) */}
       <div className="flex-1 flex flex-col bg-white rounded-3xl border border-stone-200/80 p-5 overflow-hidden shadow-xs">
-        {/* Top Controls: Search + Veg Toggle */}
+        {/* Top Controls: Search + Veg Filter */}
         <div className="flex items-center gap-3 mb-4">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3" />
             <input
               type="text"
-              placeholder="Search dishes or type item name..."
+              placeholder="Search coffee, tea, burgers, rolls, desserts..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rollify-red"
+              className="w-full pl-10 pr-4 py-2.5 bg-[#FAF7F2] border border-stone-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2D1810]"
             />
           </div>
 
           <button
             onClick={() => setVegOnly(!vegOnly)}
             className={clsx(
-              'px-3.5 py-2 rounded-xl text-xs font-bold border transition flex items-center gap-2 shrink-0',
+              'px-4 py-2.5 rounded-2xl text-xs font-bold border transition flex items-center gap-2 shrink-0 cursor-pointer',
               vegOnly
-                ? 'bg-emerald-50 border-emerald-400 text-emerald-800'
+                ? 'bg-emerald-50 border-emerald-400 text-emerald-800 shadow-xs'
                 : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-50'
             )}
           >
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
-            Veg Only
+            Pure Veg
           </button>
         </div>
 
         {/* Category Horizontal Scroll Pills */}
-        <div className="flex gap-1.5 overflow-x-auto pb-3 mb-2 border-b border-stone-100 shrink-0">
+        <div className="flex gap-2 overflow-x-auto pb-3 mb-3 border-b border-stone-100 shrink-0 select-none">
           <button
             onClick={() => setSelectedCat('ALL')}
             className={clsx(
-              'px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0',
+              'px-4 py-2 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer flex items-center gap-1.5',
               selectedCat === 'ALL'
-                ? 'bg-rollify-red text-white shadow-xs'
-                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                ? 'bg-[#2D1810] text-white shadow-xs'
+                : 'bg-[#FAF7F2] text-stone-600 hover:bg-stone-200/70 border border-stone-200/50'
             )}
           >
+            <Sparkles className="w-3.5 h-3.5 text-[#EA580C]" />
             All Items
           </button>
           {categories.map((c) => (
@@ -317,73 +400,88 @@ export const POSOrderPage: React.FC = () => {
               key={c.id}
               onClick={() => setSelectedCat(c.id)}
               className={clsx(
-                'px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0',
+                'px-4 py-2 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer flex items-center gap-1.5',
                 selectedCat === c.id
-                  ? 'bg-rollify-red text-white shadow-xs'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                  ? 'bg-[#2D1810] text-white shadow-xs'
+                  : 'bg-[#FAF7F2] text-stone-700 hover:bg-stone-200/70 border border-stone-200/50'
               )}
             >
+              {c.name.includes('Coffee') && <Coffee className="w-3.5 h-3.5 text-[#EA580C]" />}
+              {c.name.includes('Tea') && <CupSoda className="w-3.5 h-3.5 text-[#EA580C]" />}
               {c.name}
             </button>
           ))}
         </div>
 
-        {/* Items Grid (Touch-optimized large cards) */}
-        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        {/* Product Cards Grid with Food Images */}
+        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5">
           {filteredItems.map((item) => (
             <div
               key={item.id}
               onClick={() => handleItemClick(item)}
-              className="p-3.5 rounded-2xl border border-stone-200 hover:border-rollify-gold hover:shadow-md transition cursor-pointer bg-white flex flex-col justify-between active:scale-[0.98] select-none group"
+              className="rounded-2xl border border-stone-200 hover:border-[#EA580C] hover:shadow-md transition cursor-pointer bg-white flex flex-col justify-between active:scale-[0.98] select-none group overflow-hidden"
             >
-              <div>
-                <div className="flex items-start justify-between gap-1 mb-1.5">
+              {/* Product Photo Canvas */}
+              <div className="relative w-full h-32 bg-stone-100 overflow-hidden">
+                <img
+                  src={item.image_url || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&q=80'}
+                  alt={item.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+                {/* Veg/Non-Veg Tag */}
+                <div className="absolute top-2 left-2">
                   <span
                     className={clsx(
-                      'w-3.5 h-3.5 rounded-xs border flex items-center justify-center shrink-0 mt-0.5',
+                      'w-4 h-4 rounded-xs border-2 bg-white/95 backdrop-blur-xs flex items-center justify-center shadow-xs',
                       item.is_veg ? 'border-emerald-600' : 'border-red-600'
                     )}
                   >
                     <span
-                      className={clsx(
-                        'w-1.5 h-1.5 rounded-full',
-                        item.is_veg ? 'bg-emerald-600' : 'bg-red-600'
-                      )}
+                      className={clsx('w-2 h-2 rounded-full', item.is_veg ? 'bg-emerald-600' : 'bg-red-600')}
                     />
-                  </span>
-
-                  <span className="text-xs font-mono font-bold text-rollify-charcoal group-hover:text-rollify-red">
-                    {item.variants && item.variants.length > 1 ? (
-                      `₹${item.variants[0].price}+`
-                    ) : (
-                      `₹${Number(item.price)}`
-                    )}
                   </span>
                 </div>
 
-                <h4 className="text-xs font-bold text-stone-900 leading-snug line-clamp-2">
-                  {item.name}
-                </h4>
-
-                <div className="flex items-center gap-1 mt-1.5">
+                {/* Chef Special / Spicy Badges */}
+                <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
                   {item.is_chef_special && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-900">
+                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-[#EA580C] text-white shadow-xs">
                       ★ Special
                     </span>
                   )}
                   {item.is_spicy && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-100 text-rose-900">
+                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-red-600 text-white shadow-xs">
                       🌶 Spicy
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="mt-2 pt-2 border-t border-stone-100 flex items-center justify-between text-[10px] text-stone-400 font-medium">
-                <span>{item.prep_time_minutes}m prep</span>
-                <span className="text-rollify-red font-bold flex items-center gap-0.5">
-                  <Plus className="w-3 h-3" /> Add
-                </span>
+              {/* Product Info */}
+              <div className="p-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 className="text-xs font-bold text-[#2D1810] leading-snug line-clamp-1 group-hover:text-[#EA580C] transition-colors">
+                    {item.name}
+                  </h4>
+                  <p className="text-[10px] text-stone-500 line-clamp-1 mt-0.5">
+                    {item.description || 'Artisanal cafe special'}
+                  </p>
+                </div>
+
+                <div className="mt-2 pt-2 border-t border-stone-100 flex items-center justify-between">
+                  <span className="text-xs font-mono font-black text-[#2D1810]">
+                    {item.variants && item.variants.length > 1 ? (
+                      `₹${item.variants[0].price}+`
+                    ) : (
+                      `₹${Number(item.price)}`
+                    )}
+                  </span>
+
+                  <span className="text-[11px] font-bold text-[#EA580C] bg-[#FFF7ED] px-2 py-0.5 rounded-lg flex items-center gap-1 group-hover:bg-[#EA580C] group-hover:text-white transition-all">
+                    <Plus className="w-3 h-3" /> Add
+                  </span>
+                </div>
               </div>
             </div>
           ))}
@@ -391,14 +489,14 @@ export const POSOrderPage: React.FC = () => {
       </div>
 
       {/* RIGHT: Active Order Cart & Fast Checkout (30% width) */}
-      <div className="w-full xl:w-96 flex flex-col bg-white rounded-3xl border border-stone-200/80 p-5 shadow-sm">
+      <div className="w-full xl:w-96 flex flex-col bg-white rounded-3xl border border-stone-200/80 p-5 shadow-xs">
         {/* Order Mode Selector */}
-        <div className="grid grid-cols-3 gap-1.5 p-1 bg-stone-100 rounded-2xl mb-4">
+        <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#FAF7F2] border border-stone-200/60 rounded-2xl mb-3">
           <button
             onClick={() => setOrderType('DINE_IN')}
             className={clsx(
-              'py-1.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1',
-              orderType === 'DINE_IN' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500'
+              'py-2 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer',
+              orderType === 'DINE_IN' ? 'bg-[#2D1810] text-white shadow-xs' : 'text-stone-600 hover:text-stone-900'
             )}
           >
             <UtensilsCrossed className="w-3.5 h-3.5" />
@@ -407,18 +505,18 @@ export const POSOrderPage: React.FC = () => {
           <button
             onClick={() => setOrderType('TAKEAWAY')}
             className={clsx(
-              'py-1.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1',
-              orderType === 'TAKEAWAY' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500'
+              'py-2 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer',
+              orderType === 'TAKEAWAY' ? 'bg-[#2D1810] text-white shadow-xs' : 'text-stone-600 hover:text-stone-900'
             )}
           >
             <Package className="w-3.5 h-3.5" />
-            Parcel (+₹10)
+            Takeaway
           </button>
           <button
             onClick={() => setOrderType('DELIVERY')}
             className={clsx(
-              'py-1.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1',
-              orderType === 'DELIVERY' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500'
+              'py-2 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer',
+              orderType === 'DELIVERY' ? 'bg-[#2D1810] text-white shadow-xs' : 'text-stone-600 hover:text-stone-900'
             )}
           >
             Delivery
@@ -428,13 +526,20 @@ export const POSOrderPage: React.FC = () => {
         {/* Table Selector (if Dine-in) */}
         {orderType === 'DINE_IN' && (
           <div className="mb-3">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
-              Select Table
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                Assigned Table
+              </label>
+              {isSelectedTableOccupied && (
+                <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-amber-100 text-amber-900">
+                  Occupied (Active Order)
+                </span>
+              )}
+            </div>
             <select
               value={selectedTableId}
               onChange={(e) => setSelectedTableId(e.target.value)}
-              className="w-full bg-stone-50 border border-stone-200 rounded-xl py-2 px-3 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rollify-red"
+              className="w-full bg-[#FAF7F2] border border-stone-200 rounded-xl py-2 px-3 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#2D1810]"
             >
               <option value="">-- Choose Dining Table --</option>
               {tables.map((t) => (
@@ -450,86 +555,91 @@ export const POSOrderPage: React.FC = () => {
         <div className="grid grid-cols-2 gap-2 mb-3">
           <input
             type="text"
-            placeholder="Guest Name (Optional)"
+            placeholder="Customer name (opt)"
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
-            className="w-full bg-stone-50 border border-stone-200 rounded-xl py-1.5 px-3 text-xs focus:outline-none"
+            className="w-full px-3 py-1.5 bg-[#FAF7F2] border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#2D1810]"
           />
           <input
-            type="text"
-            placeholder="Phone (Optional)"
+            type="tel"
+            placeholder="Phone number"
             value={customerPhone}
             onChange={(e) => setCustomerPhone(e.target.value)}
-            className="w-full bg-stone-50 border border-stone-200 rounded-xl py-1.5 px-3 text-xs focus:outline-none"
+            className="w-full px-3 py-1.5 bg-[#FAF7F2] border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#2D1810]"
           />
         </div>
 
-        {/* Cart Itemized List */}
-        <div className="flex-1 overflow-y-auto space-y-2.5 my-2 pr-1 border-y border-stone-100 py-3">
+        {/* Cart Items List */}
+        <div className="flex-1 overflow-y-auto pr-1 divide-y divide-stone-100 mb-3 min-h-[160px]">
           {cart.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-6 text-stone-400">
-              <UtensilsCrossed className="w-10 h-10 stroke-[1.5] mb-2 text-stone-300" />
-              <p className="text-xs font-semibold text-stone-600">Cart is Empty</p>
-              <p className="text-[11px] text-stone-400">Tap items on the left to add them to this order</p>
+              <div className="w-12 h-12 rounded-2xl bg-[#FAF7F2] flex items-center justify-center text-[#2D1810] mb-2">
+                <UtensilsCrossed className="w-6 h-6" />
+              </div>
+              <p className="text-xs font-bold text-stone-700">Order Cart is Empty</p>
+              <p className="text-[10px] text-stone-400 mt-1 max-w-[180px]">
+                Select dishes or drinks from the menu to build the customer's order.
+              </p>
             </div>
           ) : (
-            cart.map((item) => (
-              <div key={item.cartId} className="p-2.5 bg-stone-50 rounded-2xl border border-stone-200/60">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
+            cart.map((it) => (
+              <div key={it.cartId} className="py-2.5 flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
                       <span
                         className={clsx(
-                          'w-2.5 h-2.5 rounded-full shrink-0',
-                          item.isVeg ? 'bg-emerald-600' : 'bg-red-600'
+                          'w-2 h-2 rounded-full shrink-0',
+                          it.isVeg ? 'bg-emerald-600' : 'bg-red-600'
                         )}
                       />
-                      <h5 className="text-xs font-bold text-stone-900 leading-tight">
-                        {item.name}
-                      </h5>
+                      <span className="text-xs font-bold text-stone-900 truncate">
+                        {it.name}
+                      </span>
                     </div>
-                    {item.variantName && item.variantName !== 'Single' && (
-                      <span className="text-[10px] font-mono bg-stone-200 px-1.5 py-0.2 rounded text-stone-700 ml-4 font-bold">
-                        {item.variantName}
+                    {it.variantName && it.variantName !== 'Single' && (
+                      <span className="text-[10px] text-[#EA580C] font-semibold pl-3.5">
+                        Size: {it.variantName}
                       </span>
                     )}
                   </div>
 
                   <span className="text-xs font-mono font-bold text-stone-900">
-                    ₹{item.unitPrice * item.quantity}
+                    ₹{it.unitPrice * it.quantity}
                   </span>
                 </div>
 
-                {/* Notes Input per item */}
-                <input
-                  type="text"
-                  placeholder="Notes: e.g. Extra spicy, no onion..."
-                  value={item.notes || ''}
-                  onChange={(e) => updateItemNotes(item.cartId, e.target.value)}
-                  className="w-full bg-white border border-stone-200 rounded-lg py-1 px-2 text-[11px] mt-1.5 text-stone-700 focus:outline-none"
-                />
+                {/* Special Instructions Chip & Notes */}
+                <div className="flex items-center justify-between pl-3.5 gap-2">
+                  <button
+                    onClick={() => openItemInstructions(it)}
+                    className="text-[10px] text-[#EA580C] hover:underline flex items-center gap-1 font-medium bg-[#FFF7ED] px-2 py-0.5 rounded-md"
+                  >
+                    <MessageSquare className="w-3 h-3" />
+                    {it.notes ? `Note: ${it.notes}` : '+ Add Instructions'}
+                  </button>
 
-                {/* Quantity Controls */}
-                <div className="flex items-center justify-between mt-2 pt-1 border-t border-stone-200/40">
-                  <span className="text-[10px] text-stone-400 font-mono">
-                    ₹{item.unitPrice} each
-                  </span>
-
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button
-                      onClick={() => updateQuantity(item.cartId, -1)}
-                      className="w-6 h-6 rounded-lg bg-white border border-stone-200 flex items-center justify-center text-stone-700 hover:bg-stone-100"
+                      onClick={() => updateQuantity(it.cartId, -1)}
+                      className="w-6 h-6 rounded-lg bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 font-bold transition"
                     >
                       <Minus className="w-3 h-3" />
                     </button>
-                    <span className="text-xs font-mono font-bold w-4 text-center">
-                      {item.quantity}
+                    <span className="text-xs font-bold font-mono w-4 text-center">
+                      {it.quantity}
                     </span>
                     <button
-                      onClick={() => updateQuantity(item.cartId, 1)}
-                      className="w-6 h-6 rounded-lg bg-white border border-stone-200 flex items-center justify-center text-stone-700 hover:bg-stone-100"
+                      onClick={() => updateQuantity(it.cartId, 1)}
+                      className="w-6 h-6 rounded-lg bg-[#2D1810] text-white flex items-center justify-center font-bold transition"
                     >
                       <Plus className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => updateQuantity(it.cartId, -it.quantity)}
+                      className="text-stone-300 hover:text-red-500 p-1 transition"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -538,91 +648,165 @@ export const POSOrderPage: React.FC = () => {
           )}
         </div>
 
-        {/* Bill Summary Calculations */}
-        <div className="pt-2 space-y-1.5 text-xs text-stone-600">
-          <div className="flex justify-between">
-            <span>Subtotal ({cart.reduce((a, b) => a + b.quantity, 0)} items)</span>
+        {/* Global Order Note */}
+        <input
+          type="text"
+          placeholder="General kitchen instructions (e.g. Serve hot)..."
+          value={orderNotes}
+          onChange={(e) => setOrderNotes(e.target.value)}
+          className="w-full px-3 py-1.5 bg-[#FAF7F2] border border-stone-200 rounded-xl text-xs mb-3 focus:outline-none focus:ring-1 focus:ring-[#2D1810]"
+        />
+
+        {/* Price Breakdown */}
+        <div className="p-3 bg-[#FAF7F2] border border-stone-200/80 rounded-2xl space-y-1.5 mb-3 text-xs">
+          <div className="flex justify-between text-stone-600">
+            <span>Item Subtotal</span>
             <span className="font-mono">₹{subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-stone-500">
-            <span>GST (5%)</span>
+          <div className="flex justify-between text-stone-600">
+            <span>GST (5.0%)</span>
             <span className="font-mono">₹{taxAmount.toFixed(2)}</span>
           </div>
           {parcelCharge > 0 && (
-            <div className="flex justify-between text-stone-500">
-              <span>Parcel Charge</span>
+            <div className="flex justify-between text-stone-600">
+              <span>Parcel Packaging</span>
               <span className="font-mono">₹{parcelCharge.toFixed(2)}</span>
             </div>
           )}
-          <div className="flex justify-between text-base font-black text-stone-900 pt-2 border-t border-stone-100">
-            <span>Grand Total</span>
-            <span className="font-mono text-rollify-red">₹{grandTotal.toFixed(2)}</span>
+          <div className="flex justify-between text-[#2D1810] font-black text-sm pt-1.5 border-t border-stone-200">
+            <span>Total Payable</span>
+            <span className="font-mono text-[#EA580C]">₹{grandTotal.toFixed(2)}</span>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-2 mt-4 pt-2">
+        <div className="space-y-2">
           <Button
-            type="button"
-            variant="outline"
-            size="sm"
+            variant="primary"
+            className="w-full bg-[#2D1810] hover:bg-[#1A0E09] text-white py-3 rounded-2xl flex items-center justify-center gap-2 font-bold"
             disabled={cart.length === 0 || isSubmitting}
-            onClick={() => submitOrder(false)}
+            onClick={() => submitOrder(true)}
           >
-            Save Draft
+            <Send className="w-4 h-4 text-[#EA580C]" />
+            {isSubmitting
+              ? 'Sending...'
+              : isSelectedTableOccupied
+              ? `Add Items to ${selectedTable?.table_number}`
+              : 'Send to Kitchen (KOT)'}
           </Button>
 
           <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            isLoading={isSubmitting}
-            disabled={cart.length === 0}
-            onClick={() => submitOrder(true)}
-            rightIcon={<Send className="w-3.5 h-3.5" />}
+            variant="outline"
+            className="w-full text-stone-600 border-stone-200 hover:bg-stone-50 py-2 rounded-2xl text-xs font-semibold"
+            disabled={cart.length === 0 || isSubmitting}
+            onClick={() => submitOrder(false)}
           >
-            Send KOT
+            Save Draft Order
           </Button>
         </div>
       </div>
 
-      {/* Size Variant Selector Modal */}
-      <Modal
-        isOpen={Boolean(variantModalItem)}
-        onClose={() => setVariantModalItem(null)}
-        title={
-          <div className="flex items-center gap-2">
-            <span>Select Size: {variantModalItem?.name}</span>
+      {/* Size Variant Modal */}
+      {variantModalItem && (
+        <Modal
+          isOpen={true}
+          onClose={() => setVariantModalItem(null)}
+          title={`Select Size - ${variantModalItem.name}`}
+          maxWidth="sm"
+        >
+          <div className="space-y-3">
+            <p className="text-xs text-stone-600">
+              Choose your portion size for this cafe special:
+            </p>
+            <div className="space-y-2">
+              {variantModalItem.variants?.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() =>
+                    addToCart(variantModalItem, v.id, v.variant_name, Number(v.price))
+                  }
+                  className="w-full p-3 rounded-xl border border-stone-200 hover:border-[#2D1810] hover:bg-[#FAF7F2] flex items-center justify-between text-xs font-bold transition group"
+                >
+                  <span className="text-[#2D1810] group-hover:text-[#EA580C]">
+                    {v.variant_name} Portion
+                  </span>
+                  <span className="font-mono text-stone-900">₹{v.price}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        }
-        maxWidth="sm"
-      >
-        <div className="space-y-3 py-2">
-          <p className="text-xs text-stone-500">
-            Choose portion size for this dish:
-          </p>
+        </Modal>
+      )}
 
-          <div className="grid grid-cols-2 gap-3">
-            {variantModalItem?.variants?.map((v) => (
-              <button
-                key={v.id}
-                onClick={() =>
-                  variantModalItem &&
-                  addToCart(variantModalItem, v.id, v.variant_name, Number(v.price))
-                }
-                className="p-4 rounded-2xl border-2 border-stone-200 hover:border-rollify-red hover:bg-rollify-red-50 text-center transition group active:scale-95"
+      {/* Special Instructions & Customization Modal */}
+      {editingCartItem && (
+        <Modal
+          isOpen={true}
+          onClose={() => setEditingCartItem(null)}
+          title={`Customization - ${editingCartItem.name}`}
+          maxWidth="sm"
+        >
+          <div className="space-y-4">
+            <p className="text-xs text-stone-600">
+              Select standard preparation presets or enter custom instructions:
+            </p>
+
+            {/* Preset instruction chips */}
+            <div className="flex flex-wrap gap-1.5">
+              {SPECIAL_INSTRUCTION_PRESETS.map((preset) => {
+                const isSelected = itemNoteInput.includes(preset);
+                return (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => togglePresetInstruction(preset)}
+                    className={clsx(
+                      'px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer border',
+                      isSelected
+                        ? 'bg-[#2D1810] text-white border-[#2D1810]'
+                        : 'bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100'
+                    )}
+                  >
+                    {preset}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Freeform text input */}
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                Custom Kitchen Note
+              </label>
+              <textarea
+                rows={2}
+                value={itemNoteInput}
+                onChange={(e) => setItemNoteInput(e.target.value)}
+                placeholder="e.g. Extra hot, no whipped cream, serve on the side..."
+                className="w-full p-2.5 bg-[#FAF7F2] border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#2D1810]"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditingCartItem(null)}
               >
-                <span className="block text-sm font-extrabold text-stone-900 group-hover:text-rollify-red">
-                  {v.variant_name === 'REG' ? 'Regular' : v.variant_name === 'LRG' ? 'Large' : v.variant_name}
-                </span>
-                <span className="block text-base font-black font-mono text-rollify-charcoal mt-1">
-                  ₹{Number(v.price)}
-                </span>
-              </button>
-            ))}
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                className="bg-[#2D1810] text-white"
+                onClick={saveItemInstructions}
+              >
+                Save Instructions
+              </Button>
+            </div>
           </div>
-        </div>
-      </Modal>
+        </Modal>
+      )}
     </div>
   );
 };

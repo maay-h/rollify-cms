@@ -85,15 +85,16 @@ export async function seedDatabase() {
     await db.query(`
       INSERT INTO menu_items (
         id, category_id, name, description, price, tax_rate, is_veg, 
-        is_chef_special, is_spicy, prep_time_minutes, display_order
+        is_chef_special, is_spicy, image_url, prep_time_minutes, display_order
       )
-      VALUES ($1, $2, $3, $4, $5, 5.00, $6, $7, $8, $9, $10)
+      VALUES ($1, $2, $3, $4, $5, 5.00, $6, $7, $8, $9, $10, $11)
       ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
         price = EXCLUDED.price,
         is_veg = EXCLUDED.is_veg,
         is_chef_special = EXCLUDED.is_chef_special,
         is_spicy = EXCLUDED.is_spicy,
+        image_url = EXCLUDED.image_url,
         prep_time_minutes = EXCLUDED.prep_time_minutes,
         display_order = EXCLUDED.display_order;
     `, [
@@ -105,6 +106,7 @@ export async function seedDatabase() {
       item.is_veg,
       item.is_chef_special || false,
       item.is_spicy || false,
+      item.image_url || null,
       item.prep_time_minutes,
       idx + 1,
     ]);

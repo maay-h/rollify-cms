@@ -32,6 +32,27 @@ export const DEMO_TABLES = [
   { id: 'tbl-10', table_number: 'BAR-02', section: 'Quick Counter', capacity: 1, status: 'AVAILABLE', qr_token: 'QR_BAR_02_ROL' },
 ];
 
+function getProductImage(categoryId: string, name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes('espresso')) return 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=500&q=80';
+  if (n.includes('cappuccino')) return 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=500&q=80';
+  if (n.includes('latte')) return 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=500&q=80';
+  if (n.includes('cold coffee') || n.includes('cold brew')) return 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=500&q=80';
+  if (n.includes('macchiato') || n.includes('mocha')) return 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=500&q=80';
+  if (n.includes('chai') || n.includes('tea')) return 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80';
+  if (n.includes('burger')) return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&q=80';
+  if (n.includes('fries')) return 'https://images.unsplash.com/photo-1576107232684-1279f3908594?w=500&q=80';
+  if (n.includes('sandwich')) return 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&q=80';
+  if (n.includes('lava') || n.includes('brownie') || n.includes('cake') || n.includes('dessert')) return 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&q=80';
+  if (n.includes('shake')) return 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80';
+  if (n.includes('mojito')) return 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=500&q=80';
+  if (n.includes('wing') || n.includes('popcorn') || n.includes('lollipop') || n.includes('strip')) return 'https://images.unsplash.com/photo-1562967914-608f82629710?w=500&q=80';
+  if (n.includes('roll') || n.includes('wrap')) return 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=500&q=80';
+  if (n.includes('rice') || n.includes('bowl')) return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80';
+  if (n.includes('water') || n.includes('coke') || n.includes('drink') || n.includes('beverage')) return 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500&q=80';
+  return 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&q=80';
+}
+
 export const DEMO_CATEGORIES = OFFICIAL_CATEGORIES;
 
 export const DEMO_MENU_ITEMS = OFFICIAL_MENU_ITEMS.map((item) => {
@@ -53,7 +74,7 @@ export const DEMO_MENU_ITEMS = OFFICIAL_MENU_ITEMS.map((item) => {
   return {
     id: item.id,
     category_id: item.category_id,
-    category_name: cat ? cat.name : 'Rollify Spec',
+    category_name: cat ? cat.name : 'Cafe Spec',
     name: item.name,
     description: item.description || '',
     price: item.price.toString(),
@@ -62,6 +83,7 @@ export const DEMO_MENU_ITEMS = OFFICIAL_MENU_ITEMS.map((item) => {
     is_available: true,
     is_chef_special: item.is_chef_special || false,
     is_spicy: item.is_spicy || false,
+    image_url: (item as any).image_url || getProductImage(item.category_id, item.name),
     prep_time_minutes: item.prep_time_minutes || 6,
     variants,
   };

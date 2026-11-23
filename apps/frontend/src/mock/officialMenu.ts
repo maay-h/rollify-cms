@@ -20,29 +20,48 @@ export interface SeedMenuItem {
   is_veg: boolean;
   is_chef_special?: boolean;
   is_spicy?: boolean;
+  image_url?: string;
   prep_time_minutes: number;
   variants?: SeedVariant[];
 }
 
 export const OFFICIAL_CATEGORIES: SeedCategory[] = [
-  { id: 'cat-starters-nv', name: 'Starters – Non-Veg', slug: 'starters-non-veg', description: 'Crispy wings, pops, tikkas and lollipops', display_order: 1 },
-  { id: 'cat-starters-veg', name: 'Starters – Veg', slug: 'starters-veg', description: 'Crispy paneer, kurkure, mushrooms and tandoori bites', display_order: 2 },
-  { id: 'cat-rolls-nv', name: 'Rolls – Non-Veg', slug: 'rolls-non-veg', description: 'Hand-rolled warm paratha rolls loaded with chicken & egg', display_order: 3 },
-  { id: 'cat-rolls-veg', name: 'Rolls – Veg', slug: 'rolls-veg', description: 'Signature veg, paneer tikka, and Mexican wraps', display_order: 4 },
+  { id: 'cat-coffee', name: 'Coffee & Espresso', slug: 'coffee-espresso', description: 'Artisanal hot and iced coffees, espresso and lattes', display_order: 1 },
+  { id: 'cat-tea', name: 'Artisanal Teas & Chai', slug: 'teas-chai', description: 'Freshly brewed masala chai, kulhad specials and iced teas', display_order: 2 },
+  { id: 'cat-burgers', name: 'Burgers', slug: 'burgers', description: 'Brioche burgers with crunchy patties and fries', display_order: 3 },
+  { id: 'cat-sandwich', name: 'Sandwich', slug: 'sandwich', description: 'Toasted club sandwiches served with crispy golden fries', display_order: 4 },
   { id: 'cat-fries', name: 'Fries', slug: 'fries', description: 'Classic, peri-peri, and overloaded gourmet fries', display_order: 5 },
-  { id: 'cat-sandwich', name: 'Sandwich', slug: 'sandwich', description: 'Toasted club sandwiches served with crispy golden fries', display_order: 6 },
-  { id: 'cat-rice-bowl', name: 'Rice Bowl', slug: 'rice-bowl', description: 'Flavourful seasoned rice bowls with fresh toppings', display_order: 7 },
-  { id: 'cat-burgers', name: 'Burgers', slug: 'burgers', description: 'Brioche burgers with crunchy patties and fries', display_order: 8 },
-  { id: 'cat-byob', name: 'BYOB', slug: 'byob', description: 'Build Your Own Bowl / Roll custom creations', display_order: 9 },
-  { id: 'cat-combo', name: 'Combo', slug: 'combo', description: 'Value meal combinations with sides and beverage', display_order: 10 },
-  { id: 'cat-dips', name: 'Dips', slug: 'dips', description: 'House-crafted signature artisanal dips', display_order: 11 },
-  { id: 'cat-addons', name: 'Add-Ons', slug: 'add-ons', description: 'Extra cheese, egg, peri peri seasoning and drinks', display_order: 12 },
-  { id: 'cat-shakes', name: 'Thick Shakes', slug: 'thick-shakes', description: 'Rich creamy artisanal dairy thickshakes and coffees', display_order: 13 },
-  { id: 'cat-mojitos', name: "Mojito's", slug: 'mojitos', description: 'Refreshing sparkling fruit coolers with fresh mint and citrus', display_order: 14 },
-  { id: 'cat-beverages', name: 'Beverages', slug: 'beverages', description: 'Chilled packaged water and soft beverages', display_order: 15 },
+  { id: 'cat-desserts', name: 'Desserts & Bakery', slug: 'desserts-bakery', description: 'Warm choco lava cakes, brownies and cheesecakes', display_order: 6 },
+  { id: 'cat-rolls-nv', name: 'Rolls – Non-Veg', slug: 'rolls-non-veg', description: 'Hand-rolled warm paratha rolls loaded with chicken & egg', display_order: 7 },
+  { id: 'cat-rolls-veg', name: 'Rolls – Veg', slug: 'rolls-veg', description: 'Signature veg, paneer tikka, and Mexican wraps', display_order: 8 },
+  { id: 'cat-starters-nv', name: 'Starters – Non-Veg', slug: 'starters-non-veg', description: 'Crispy wings, pops, tikkas and lollipops', display_order: 9 },
+  { id: 'cat-starters-veg', name: 'Starters – Veg', slug: 'starters-veg', description: 'Crispy paneer, kurkure, mushrooms and tandoori bites', display_order: 10 },
+  { id: 'cat-shakes', name: 'Thick Shakes', slug: 'thick-shakes', description: 'Rich creamy artisanal dairy thickshakes and coffees', display_order: 11 },
+  { id: 'cat-mojitos', name: "Mojito's", slug: 'mojitos', description: 'Refreshing sparkling fruit coolers with fresh mint and citrus', display_order: 12 },
+  { id: 'cat-beverages', name: 'Beverages', slug: 'beverages', description: 'Chilled packaged water and soft beverages', display_order: 13 },
+  { id: 'cat-combo', name: 'Combo', slug: 'combo', description: 'Value meal combinations with sides and beverage', display_order: 14 },
+  { id: 'cat-addons', name: 'Add-Ons', slug: 'add-ons', description: 'Extra cheese, egg, peri peri seasoning and drinks', display_order: 15 },
 ];
 
 export const OFFICIAL_MENU_ITEMS: SeedMenuItem[] = [
+  // COFFEE & ESPRESSO
+  { id: 'cff-01', category_id: 'cat-coffee', name: 'Espresso Romano', price: 89, is_veg: true, is_chef_special: true, prep_time_minutes: 3, image_url: 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=500&q=80', variants: [{ name: 'REG', price: 89 }, { name: 'LRG', price: 119 }] },
+  { id: 'cff-02', category_id: 'cat-coffee', name: 'Classic Cafe Latte', price: 139, is_veg: true, prep_time_minutes: 4, image_url: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=500&q=80', variants: [{ name: 'REG', price: 139 }, { name: 'LRG', price: 169 }] },
+  { id: 'cff-03', category_id: 'cat-coffee', name: 'Velvet Cappuccino', price: 129, is_veg: true, is_chef_special: true, prep_time_minutes: 4, image_url: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=500&q=80', variants: [{ name: 'REG', price: 129 }, { name: 'LRG', price: 159 }] },
+  { id: 'cff-04', category_id: 'cat-coffee', name: 'Classic Cold Coffee with Ice Cream', price: 149, is_veg: true, is_chef_special: true, prep_time_minutes: 5, image_url: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=500&q=80', variants: [{ name: 'REG', price: 149 }, { name: 'LRG', price: 189 }] },
+  { id: 'cff-05', category_id: 'cat-coffee', name: 'Caramel Macchiato', price: 159, is_veg: true, prep_time_minutes: 5, image_url: 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=500&q=80', variants: [{ name: 'REG', price: 159 }, { name: 'LRG', price: 189 }] },
+  { id: 'cff-06', category_id: 'cat-coffee', name: 'Dark Mocha Frappe', price: 159, is_veg: true, prep_time_minutes: 5, image_url: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80', variants: [{ name: 'REG', price: 159 }, { name: 'LRG', price: 189 }] },
+
+  // TEAS & CHAI
+  { id: 'tea-01', category_id: 'cat-tea', name: 'Special Masala Chai', price: 49, is_veg: true, is_chef_special: true, prep_time_minutes: 4, image_url: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80', variants: [{ name: 'REG', price: 49 }, { name: 'LRG', price: 69 }] },
+  { id: 'tea-02', category_id: 'cat-tea', name: 'Kulhad Adrak Elaichi Chai', price: 59, is_veg: true, prep_time_minutes: 4, image_url: 'https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?w=500&q=80', variants: [{ name: 'REG', price: 59 }, { name: 'LRG', price: 79 }] },
+  { id: 'tea-03', category_id: 'cat-tea', name: 'Peach Iced Tea', price: 99, is_veg: true, prep_time_minutes: 3, image_url: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=500&q=80', variants: [{ name: 'REG', price: 99 }, { name: 'LRG', price: 129 }] },
+  { id: 'tea-04', category_id: 'cat-tea', name: 'Lemon Mint Iced Tea', price: 99, is_veg: true, prep_time_minutes: 3, image_url: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=500&q=80', variants: [{ name: 'REG', price: 99 }, { name: 'LRG', price: 129 }] },
+
+  // DESSERTS & BAKERY
+  { id: 'dst-01', category_id: 'cat-desserts', name: 'Warm Choco Lava Cake', price: 99, is_veg: true, is_chef_special: true, prep_time_minutes: 6, image_url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&q=80' },
+  { id: 'dst-02', category_id: 'cat-desserts', name: 'Sizzling Brownie with Vanilla Ice Cream', price: 149, is_veg: true, is_chef_special: true, prep_time_minutes: 6, image_url: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=500&q=80' },
+  { id: 'dst-03', category_id: 'cat-desserts', name: 'New York Style Baked Cheesecake', price: 169, is_veg: true, prep_time_minutes: 2, image_url: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=500&q=80' },
   // 1. STARTERS – NON-VEG
   {
     id: 'snv-01',

@@ -158,24 +158,24 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-rollify-red-700 via-rollify-red to-rollify-red-600 p-6 sm:p-8 text-white shadow-xl shadow-rollify-red/10">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-cafe-espresso via-cafe-roast to-cafe-mocha p-6 sm:p-8 text-white shadow-xl shadow-stone-900/10 border border-stone-800/40">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold backdrop-blur-xs">
-              <Sparkles className="w-3.5 h-3.5 text-rollify-gold" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold backdrop-blur-xs text-amber-200">
+              <Sparkles className="w-3.5 h-3.5 text-cafe-accent" />
               <span>Rollify Cafe • Flagship Terminal</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-              Welcome back, {user?.fullName}!
+              Welcome back, {user?.fullName || user?.username || 'Cafe Team'}!
             </h1>
-            <p className="text-sm text-white/80 max-w-xl">
+            <p className="text-sm text-amber-100/80 max-w-xl">
               Fast order taking, live kitchen display, automated recipe inventory tracking, and daily cash reconciliation.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-2.5">
             <Button
-              variant="gold"
+              className="bg-cafe-accent hover:bg-orange-600 text-white font-bold border-none shadow-md shadow-orange-950/20"
               onClick={() => navigate('/pos')}
               rightIcon={<ArrowRight className="w-4 h-4" />}
             >
