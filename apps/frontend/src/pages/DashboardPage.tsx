@@ -22,7 +22,8 @@ import {
   CreditCard,
   BarChart3,
   DollarSign,
-  AlertTriangle
+  AlertTriangle,
+  CheckCircle2
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -293,31 +294,24 @@ export const DashboardPage: React.FC = () => {
           </p>
         </Card>
 
-        {/* Metric 4: Inventory Health */}
+        {/* Metric 4: Total Orders & AOV */}
         <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-stone-500">
-              Inventory Status
+              Total Orders & AOV
             </span>
-            <div className="w-9 h-9 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center">
-              <PackageSearch className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            {stats.lowStockCount > 0 ? (
-              <>
-                <span className="text-2xl font-black text-amber-900">{stats.lowStockCount} Items</span>
-                <Badge variant="warning" size="sm" dot>Reorder</Badge>
-              </>
-            ) : (
-              <>
-                <span className="text-2xl font-black text-stone-900">Optimal</span>
-                <Badge variant="success" size="sm" dot>In Stock</Badge>
-              </>
-            )}
+            <span className="text-2xl font-black text-stone-900">
+              {stats.orderCounts.completed + stats.orderCounts.created + stats.orderCounts.toKitchen + stats.orderCounts.preparing + stats.orderCounts.ready + stats.orderCounts.served} Orders
+            </span>
+            <Badge variant="paid" size="sm" dot>Live</Badge>
           </div>
           <p className="text-xs text-stone-500 mt-2">
-            {stats.totalMenuItems} Menu Items • Recipe Tracking
+            AOV: ₹{stats.todaySales > 0 ? (stats.todaySales / Math.max(1, stats.orderCounts.completed || 1)).toFixed(0) : '0'} avg per order
           </p>
         </Card>
       </div>
@@ -442,7 +436,7 @@ export const DashboardPage: React.FC = () => {
                 {['ADMIN', 'MANAGER'].includes(user?.role || '') && (
                   <li className="flex items-center gap-2 text-purple-700 font-medium">
                     <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                    Inventory, expenses & P&L reports
+                    Menu catalog, table floor plan, staff & reports
                   </li>
                 )}
               </ul>
@@ -460,39 +454,21 @@ export const DashboardPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             {
               to: '/pos',
-              title: 'Fast POS Terminal',
-              desc: 'Quick counter & dine-in billing',
+              title: 'Order Entry (POS)',
+              desc: 'Digital menu, categories & order cart',
               icon: <ShoppingCart className="w-4 h-4" />,
               color: 'bg-rollify-red-50 text-rollify-red group-hover:scale-110',
               borderColor: 'hover:border-rollify-red/50',
               roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER'],
             },
             {
-              to: '/orders',
-              title: 'Live Orders Stream',
-              desc: 'Queue, modifications & status',
-              icon: <ListOrdered className="w-4 h-4" />,
-              color: 'bg-blue-50 text-blue-700 group-hover:scale-110',
-              borderColor: 'hover:border-blue-300',
-              roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER', 'KITCHEN'],
-            },
-            {
-              to: '/tables',
-              title: 'Table Floor Plan',
-              desc: '10 tables in 4 cafe zones',
-              icon: <UtensilsCrossed className="w-4 h-4" />,
-              color: 'bg-stone-100 text-stone-700 group-hover:scale-110',
-              borderColor: 'hover:border-stone-400',
-              roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER'],
-            },
-            {
               to: '/kitchen',
               title: 'Kitchen Display (KDS)',
-              desc: 'Live tickets & audio chime',
+              desc: 'Live tickets, timers & audio chime',
               icon: <ChefHat className="w-4 h-4" />,
               color: 'bg-amber-50 text-amber-700 group-hover:scale-110',
               borderColor: 'hover:border-amber-300',
@@ -500,56 +476,56 @@ export const DashboardPage: React.FC = () => {
             },
             {
               to: '/billing',
-              title: 'Billing & Checkout',
-              desc: '5% GST, Cash/UPI/Card tender',
+              title: 'Cashier Dashboard',
+              desc: '5% GST, Split Pay, Invoices & Receipts',
               icon: <Receipt className="w-4 h-4" />,
               color: 'bg-emerald-50 text-emerald-700 group-hover:scale-110',
               borderColor: 'hover:border-emerald-300',
               roles: ['ADMIN', 'MANAGER', 'CASHIER'],
             },
             {
-              to: '/day-closing',
-              title: 'Shift Day Closing',
-              desc: 'Cash drawer variance audit',
-              icon: <Clock className="w-4 h-4" />,
-              color: 'bg-purple-50 text-purple-700 group-hover:scale-110',
-              borderColor: 'hover:border-purple-300',
-              roles: ['ADMIN', 'MANAGER', 'CASHIER'],
-            },
-            {
-              to: '/inventory',
-              title: 'Inventory & Recipes',
-              desc: 'Stock ledger & consumption',
-              icon: <PackageSearch className="w-4 h-4" />,
-              color: 'bg-amber-50 text-amber-800 group-hover:scale-110',
-              borderColor: 'hover:border-amber-300',
-              roles: ['ADMIN', 'MANAGER', 'KITCHEN'],
-            },
-            {
-              to: '/expenses',
-              title: 'Expenses & Payables',
-              desc: 'Operating overheads & suppliers',
-              icon: <CreditCard className="w-4 h-4" />,
-              color: 'bg-rose-50 text-rose-700 group-hover:scale-110',
-              borderColor: 'hover:border-rose-300',
-              roles: ['ADMIN', 'MANAGER'],
-            },
-            {
-              to: '/shifts',
-              title: 'Staff Shifts & Hours',
-              desc: 'Attendance clock-in & wages',
-              icon: <Clock className="w-4 h-4" />,
-              color: 'bg-teal-50 text-teal-700 group-hover:scale-110',
-              borderColor: 'hover:border-teal-300',
+              to: '/orders',
+              title: 'Order Management',
+              desc: 'Track live orders & table status',
+              icon: <ListOrdered className="w-4 h-4" />,
+              color: 'bg-blue-50 text-blue-700 group-hover:scale-110',
+              borderColor: 'hover:border-blue-300',
               roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER', 'KITCHEN'],
             },
             {
-              to: '/analytics',
-              title: 'P&L & Analytics',
-              desc: 'Executive profit statements',
-              icon: <BarChart3 className="w-4 h-4" />,
+              to: '/tables',
+              title: 'Table Management',
+              desc: '10 tables across dining floor zones',
+              icon: <UtensilsCrossed className="w-4 h-4" />,
+              color: 'bg-stone-100 text-stone-700 group-hover:scale-110',
+              borderColor: 'hover:border-stone-400',
+              roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER'],
+            },
+            {
+              to: '/menu',
+              title: 'Menu Management',
+              desc: 'Dishes, categories, prices & availability',
+              icon: <BookOpen className="w-4 h-4" />,
+              color: 'bg-purple-50 text-purple-700 group-hover:scale-110',
+              borderColor: 'hover:border-purple-300',
+              roles: ['ADMIN', 'MANAGER'],
+            },
+            {
+              to: '/users',
+              title: 'Staff Management',
+              desc: 'Admin, Manager, Cashier, Waiter, Kitchen',
+              icon: <Users className="w-4 h-4" />,
               color: 'bg-indigo-50 text-indigo-700 group-hover:scale-110',
               borderColor: 'hover:border-indigo-300',
+              roles: ['ADMIN', 'MANAGER'],
+            },
+            {
+              to: '/analytics',
+              title: 'Revenue & Reports',
+              desc: 'P&L statements, Excel CSV & PDF print',
+              icon: <BarChart3 className="w-4 h-4" />,
+              color: 'bg-teal-50 text-teal-700 group-hover:scale-110',
+              borderColor: 'hover:border-teal-300',
               roles: ['ADMIN', 'MANAGER'],
             },
           ]

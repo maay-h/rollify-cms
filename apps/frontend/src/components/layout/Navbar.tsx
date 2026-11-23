@@ -160,11 +160,12 @@ export const Navbar: React.FC = () => {
             {switchError && <p className="text-xs text-red-600 font-semibold text-center">{switchError}</p>}
           </div>
 
-          <div className="grid grid-cols-4 gap-2 pt-2 text-center text-[10px] text-stone-500 font-mono">
+          <div className="grid grid-cols-5 gap-1.5 pt-2 text-center text-[10px] text-stone-500 font-mono">
             <span className="p-1 bg-stone-100 rounded">Admin: 1111</span>
             <span className="p-1 bg-stone-100 rounded">Mgr: 2222</span>
             <span className="p-1 bg-stone-100 rounded">Cashier: 3333</span>
             <span className="p-1 bg-stone-100 rounded">Waiter: 4444</span>
+            <span className="p-1 bg-stone-100 rounded">Kitchen: 5555</span>
           </div>
 
           <div className="flex gap-2 justify-end pt-2">

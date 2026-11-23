@@ -13,10 +13,6 @@ import { POSOrderPage } from './pages/POSOrderPage.js';
 import { OrdersListPage } from './pages/OrdersListPage.js';
 import { KitchenDisplayPage } from './pages/KitchenDisplayPage.js';
 import { BillingCheckoutPage } from './pages/BillingCheckoutPage.js';
-import { DayClosingPage } from './pages/DayClosingPage.js';
-import { InventoryPage } from './pages/InventoryPage.js';
-import { ExpensesPage } from './pages/ExpensesPage.js';
-import { StaffShiftsPage } from './pages/StaffShiftsPage.js';
 import { AnalyticsReportsPage } from './pages/AnalyticsReportsPage.js';
 import { LoadingSpinner } from './components/ui/LoadingSpinner.js';
 
@@ -64,15 +60,17 @@ export const App: React.FC = () => {
                 <Route path="kitchen" element={<KitchenDisplayPage />} />
                 <Route path="kds" element={<Navigate to="/kitchen" replace />} />
                 <Route path="billing" element={<BillingCheckoutPage />} />
-                <Route path="day-closing" element={<DayClosingPage />} />
-                <Route path="day-close" element={<Navigate to="/day-closing" replace />} />
-                <Route path="inventory" element={<InventoryPage />} />
-                <Route path="expenses" element={<ExpensesPage />} />
-                <Route path="shifts" element={<StaffShiftsPage />} />
                 <Route path="analytics" element={<AnalyticsReportsPage />} />
                 <Route path="tables" element={<TablesPage />} />
                 <Route path="menu" element={<MenuPage />} />
                 <Route path="users" element={<UsersPage />} />
+
+                {/* Legacy redirect to dashboard */}
+                <Route path="day-closing" element={<Navigate to="/dashboard" replace />} />
+                <Route path="day-close" element={<Navigate to="/dashboard" replace />} />
+                <Route path="inventory" element={<Navigate to="/dashboard" replace />} />
+                <Route path="expenses" element={<Navigate to="/dashboard" replace />} />
+                <Route path="shifts" element={<Navigate to="/dashboard" replace />} />
               </Route>
 
               {/* Fallback */}

@@ -4,17 +4,12 @@ import {
   LayoutDashboard, 
   UtensilsCrossed, 
   BookOpen, 
-  Palette, 
   Users, 
   ChefHat, 
   Receipt, 
-  PackageSearch,
   ShoppingCart,
   ListOrdered,
-  Clock,
-  BarChart3,
-  CreditCard,
-  Lock
+  BarChart3
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { clsx } from 'clsx';
@@ -31,15 +26,9 @@ export const Sidebar: React.FC = () => {
     },
     {
       to: '/pos',
-      label: 'Fast POS Terminal',
+      label: 'Order Entry (POS)',
       icon: <ShoppingCart className="w-5 h-5" />,
       roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER'],
-    },
-    {
-      to: '/orders',
-      label: 'Live Orders Stream',
-      icon: <ListOrdered className="w-5 h-5" />,
-      roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER', 'KITCHEN'],
     },
     {
       to: '/kitchen',
@@ -49,49 +38,25 @@ export const Sidebar: React.FC = () => {
     },
     {
       to: '/billing',
-      label: 'Billing & Cashier',
+      label: 'Cashier Dashboard',
       icon: <Receipt className="w-5 h-5" />,
       roles: ['ADMIN', 'MANAGER', 'CASHIER'],
     },
     {
-      to: '/day-closing',
-      label: 'Shift Day Closing',
-      icon: <Lock className="w-5 h-5" />,
-      roles: ['ADMIN', 'MANAGER', 'CASHIER'],
-    },
-    {
-      to: '/inventory',
-      label: 'Inventory & Stock',
-      icon: <PackageSearch className="w-5 h-5" />,
-      roles: ['ADMIN', 'MANAGER', 'KITCHEN'],
-    },
-    {
-      to: '/expenses',
-      label: 'Expenses & Payables',
-      icon: <CreditCard className="w-5 h-5" />,
-      roles: ['ADMIN', 'MANAGER'],
-    },
-    {
-      to: '/shifts',
-      label: 'Staff Shifts & Hours',
-      icon: <Clock className="w-5 h-5" />,
+      to: '/orders',
+      label: 'Order Management',
+      icon: <ListOrdered className="w-5 h-5" />,
       roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER', 'KITCHEN'],
     },
     {
-      to: '/analytics',
-      label: 'P&L & Analytics',
-      icon: <BarChart3 className="w-5 h-5" />,
-      roles: ['ADMIN', 'MANAGER'],
-    },
-    {
       to: '/tables',
-      label: 'Table Floor Plan',
+      label: 'Table Management',
       icon: <UtensilsCrossed className="w-5 h-5" />,
       roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER'],
     },
     {
       to: '/menu',
-      label: 'Menu & Recipes',
+      label: 'Menu Management',
       icon: <BookOpen className="w-5 h-5" />,
       roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER', 'KITCHEN'],
     },
@@ -99,6 +64,12 @@ export const Sidebar: React.FC = () => {
       to: '/users',
       label: 'Staff Management',
       icon: <Users className="w-5 h-5" />,
+      roles: ['ADMIN', 'MANAGER'],
+    },
+    {
+      to: '/analytics',
+      label: 'Revenue & Reports',
+      icon: <BarChart3 className="w-5 h-5" />,
       roles: ['ADMIN', 'MANAGER'],
     },
   ];

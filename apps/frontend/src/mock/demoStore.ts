@@ -14,9 +14,9 @@ export interface DemoUser {
 export const DEMO_USERS: DemoUser[] = [
   { id: 'usr-admin-01', username: 'admin', email: 'admin@rollify.com', role: 'ADMIN', pin_code: '1111', full_name: 'System Admin', phone: '+91 98455 71817', is_active: true },
   { id: 'usr-mgr-01', username: 'manager', email: 'manager@rollify.com', role: 'MANAGER', pin_code: '2222', full_name: 'Cafe Manager', phone: '+91 96116 39964', is_active: true },
-  { id: 'usr-cashier-01', username: 'cashier', email: 'cashier@rollify.com', role: 'CASHIER', pin_code: '3333', full_name: 'Head Cashier', phone: '+91 96119 64366', is_active: true },
-  { id: 'usr-waiter-01', username: 'waiter', email: 'waiter@rollify.com', role: 'WAITER', pin_code: '4444', full_name: 'Floor Captain Rahul', phone: '+91 98765 43213', is_active: true },
-  { id: 'usr-kitchen-01', username: 'kitchen', email: 'kitchen@rollify.com', role: 'KITCHEN', pin_code: '5555', full_name: 'Chef Suresh (KDS Master)', phone: '+91 98765 43214', is_active: true },
+  { id: 'usr-cashier-01', username: 'cashier', email: 'cashier@rollify.com', role: 'CASHIER', pin_code: '3333', full_name: 'Cafe Cashier', phone: '+91 96119 64366', is_active: true },
+  { id: 'usr-waiter-01', username: 'waiter', email: 'waiter@rollify.com', role: 'WAITER', pin_code: '4444', full_name: 'Floor Waiter', phone: '+91 98765 43213', is_active: true },
+  { id: 'usr-kitchen-01', username: 'kitchen', email: 'kitchen@rollify.com', role: 'KITCHEN', pin_code: '5555', full_name: 'Kitchen Staff', phone: '+91 98765 43214', is_active: true },
 ];
 
 export const DEMO_TABLES = [
