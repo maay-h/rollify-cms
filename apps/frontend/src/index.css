@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-[#FAF7F2] text-[#2D1810] font-sans;
+    @apply bg-[#FAF8F5] text-rollify-charcoal font-sans;
   }
 }
 

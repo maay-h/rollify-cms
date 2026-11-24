@@ -239,9 +239,9 @@ export const KitchenDisplayPage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-[1800px] mx-auto pb-12">
       {/* KDS Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#2D1810] text-white p-5 rounded-3xl shadow-xl border border-stone-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#18181B] text-white p-5 rounded-3xl shadow-xl border border-stone-800">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-[#EA580C] flex items-center justify-center text-white shadow-md">
+          <div className="w-11 h-11 rounded-2xl bg-[#C8102E] flex items-center justify-center text-white shadow-md">
             <ChefHat className="w-6 h-6" />
           </div>
           <div>
@@ -279,7 +279,7 @@ export const KitchenDisplayPage: React.FC = () => {
               onClick={() => setActiveFilter('ALL')}
               className={clsx(
                 'px-3.5 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer',
-                activeFilter === 'ALL' ? 'bg-[#EA580C] text-white shadow-xs' : 'text-stone-400 hover:text-white'
+                activeFilter === 'ALL' ? 'bg-[#C8102E] text-white shadow-xs' : 'text-stone-400 hover:text-white'
               )}
             >
               All ({tickets.length})
@@ -288,7 +288,7 @@ export const KitchenDisplayPage: React.FC = () => {
               onClick={() => setActiveFilter('NEW')}
               className={clsx(
                 'px-3 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1',
-                activeFilter === 'NEW' ? 'bg-[#EA580C] text-white shadow-xs' : 'text-stone-400 hover:text-white'
+                activeFilter === 'NEW' ? 'bg-[#C8102E] text-white shadow-xs' : 'text-stone-400 hover:text-white'
               )}
             >
               New ({newCount})
@@ -297,7 +297,7 @@ export const KitchenDisplayPage: React.FC = () => {
               onClick={() => setActiveFilter('PREPARING')}
               className={clsx(
                 'px-3 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1',
-                activeFilter === 'PREPARING' ? 'bg-[#EA580C] text-white shadow-xs' : 'text-stone-400 hover:text-white'
+                activeFilter === 'PREPARING' ? 'bg-[#C8102E] text-white shadow-xs' : 'text-stone-400 hover:text-white'
               )}
             >
               Cooking ({preparingCount})
@@ -306,7 +306,7 @@ export const KitchenDisplayPage: React.FC = () => {
               onClick={() => setActiveFilter('READY')}
               className={clsx(
                 'px-3 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1',
-                activeFilter === 'READY' ? 'bg-[#EA580C] text-white shadow-xs' : 'text-stone-400 hover:text-white'
+                activeFilter === 'READY' ? 'bg-[#C8102E] text-white shadow-xs' : 'text-stone-400 hover:text-white'
               )}
             >
               Ready ({readyCount})
@@ -318,7 +318,7 @@ export const KitchenDisplayPage: React.FC = () => {
       {/* Tickets Grid */}
       {filteredTickets.length === 0 ? (
         <div className="bg-white rounded-3xl border border-stone-200 p-12 text-center text-stone-400 shadow-xs">
-          <div className="w-16 h-16 rounded-2xl bg-[#FAF7F2] flex items-center justify-center text-[#2D1810] mx-auto mb-3">
+          <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center text-[#C8102E] mx-auto mb-3">
             <CheckCircle2 className="w-8 h-8 text-emerald-600" />
           </div>
           <h3 className="text-base font-bold text-stone-800">Kitchen Display is Clear</h3>
@@ -356,7 +356,7 @@ export const KitchenDisplayPage: React.FC = () => {
                       : isReady
                       ? 'bg-emerald-700'
                       : isPreparing
-                      ? 'bg-[#2D1810]'
+                      ? 'bg-[#C8102E]'
                       : 'bg-stone-800'
                   )}
                 >
@@ -407,7 +407,7 @@ export const KitchenDisplayPage: React.FC = () => {
                     <div key={item.id} className="pt-2 first:pt-0">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-start gap-2">
-                          <span className="w-5 h-5 rounded-md bg-[#2D1810] text-white text-xs font-mono font-bold flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="w-5 h-5 rounded-md bg-[#C8102E] text-white text-xs font-mono font-bold flex items-center justify-center shrink-0 mt-0.5">
                             {item.quantity}
                           </span>
                           <div>
@@ -415,7 +415,7 @@ export const KitchenDisplayPage: React.FC = () => {
                               {item.item_name}
                             </span>
                             {item.variant_name && item.variant_name !== 'Single' && (
-                              <span className="text-[10px] font-semibold text-[#EA580C]">
+                              <span className="text-[10px] font-semibold text-[#C8102E]">
                                 Size: {item.variant_name}
                               </span>
                             )}
@@ -430,7 +430,7 @@ export const KitchenDisplayPage: React.FC = () => {
                       {/* Special Instructions Chip */}
                       {item.notes && (
                         <div className="mt-1 pl-7">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#FFF7ED] text-[#EA580C] text-[10px] font-bold border border-[#FED7AA]">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 text-[10px] font-bold border border-amber-200">
                             ⚡ {item.notes}
                           </span>
                         </div>
@@ -442,7 +442,7 @@ export const KitchenDisplayPage: React.FC = () => {
                   {ticket.order_notes && (
                     <div className="pt-2">
                       <p className="text-[10px] font-bold text-stone-500 uppercase">Special Note:</p>
-                      <p className="text-xs font-semibold text-stone-800 italic bg-[#FAF7F2] p-2 rounded-xl mt-0.5">
+                      <p className="text-xs font-semibold text-stone-800 italic bg-stone-50 p-2 rounded-xl mt-0.5">
                         "{ticket.order_notes}"
                       </p>
                     </div>
@@ -450,16 +450,16 @@ export const KitchenDisplayPage: React.FC = () => {
                 </div>
 
                 {/* Bottom Action Controls */}
-                <div className="p-3 bg-[#FAF7F2] border-t border-stone-100 flex items-center gap-2">
+                <div className="p-3 bg-stone-50 border-t border-stone-100 flex items-center gap-2">
                   {ticket.status === 'SENT_TO_KITCHEN' && (
                     <>
                       <Button
                         variant="primary"
                         size="sm"
-                        className="flex-1 bg-[#2D1810] hover:bg-[#1A0E09] text-white font-bold text-xs py-2 flex items-center justify-center gap-1.5 rounded-xl"
+                        className="flex-1 bg-[#C8102E] hover:bg-[#A80D26] text-white font-bold text-xs py-2 flex items-center justify-center gap-1.5 rounded-xl shadow-xs"
                         onClick={() => updateTicketStatus(ticket.id, 'PREPARING')}
                       >
-                        <Play className="w-3.5 h-3.5 fill-current text-[#EA580C]" />
+                        <Play className="w-3.5 h-3.5 fill-current text-[#F59E0B]" />
                         Start Cooking
                       </Button>
                       <Button
@@ -538,7 +538,7 @@ export const KitchenDisplayPage: React.FC = () => {
               ].map((r) => (
                 <label
                   key={r}
-                  className="flex items-center gap-2 p-2 rounded-xl border border-stone-200 hover:bg-[#FAF7F2] cursor-pointer text-xs font-semibold"
+                  className="flex items-center gap-2 p-2 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer text-xs font-semibold"
                 >
                   <input
                     type="radio"
@@ -546,7 +546,7 @@ export const KitchenDisplayPage: React.FC = () => {
                     value={r}
                     checked={rejectReason === r}
                     onChange={(e) => setRejectReason(e.target.value)}
-                    className="accent-[#2D1810]"
+                    className="accent-[#C8102E]"
                   />
                   <span>{r}</span>
                 </label>
@@ -562,7 +562,7 @@ export const KitchenDisplayPage: React.FC = () => {
                 placeholder="Specific details..."
                 value={customRejectNote}
                 onChange={(e) => setCustomRejectNote(e.target.value)}
-                className="w-full px-3 py-2 bg-[#FAF7F2] border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#2D1810]"
+                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
               />
             </div>
 

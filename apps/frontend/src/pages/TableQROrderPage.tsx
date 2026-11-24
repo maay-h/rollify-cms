@@ -438,28 +438,28 @@ export const TableQROrderPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF7F2] flex flex-col items-center justify-center p-4">
-        <div className="w-12 h-12 rounded-2xl bg-[#2D1810] text-white flex items-center justify-center animate-pulse mb-3 shadow-md">
-          <UtensilsCrossed className="w-6 h-6 text-[#EA580C]" />
+      <div className="min-h-screen bg-[#FFFDF9] flex flex-col items-center justify-center p-4">
+        <div className="w-12 h-12 rounded-2xl bg-[#C8102E] text-white flex items-center justify-center animate-pulse mb-3 shadow-md">
+          <UtensilsCrossed className="w-6 h-6 text-[#F59E0B]" />
         </div>
-        <p className="text-sm font-bold text-[#2D1810]">Loading Table Menu...</p>
+        <p className="text-sm font-bold text-stone-900">Loading Table Menu...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#2D1810] pb-28 select-none">
+    <div className="min-h-screen bg-[#FFFDF9] text-stone-900 pb-28 select-none">
       {/* 1. TOP CAFE & TABLE HEADER */}
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-stone-200/80 px-4 py-3 shadow-xs">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#2D1810] text-[#EA580C] flex items-center justify-center font-black text-lg shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-[#C8102E] text-white flex items-center justify-center font-black text-lg shadow-xs">
               R
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h1 className="text-base font-black tracking-tight text-[#2D1810]">Rollify Cafe</h1>
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">
+                <h1 className="text-base font-black tracking-tight text-stone-900">Rollify Cafe</h1>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-100 text-[#C8102E]">
                   Table {table?.table_number || 'T-01'}
                 </span>
               </div>
@@ -473,11 +473,11 @@ export const TableQROrderPage: React.FC = () => {
           {customer ? (
             <button
               onClick={() => setIsLoyaltyExpanded(!isLoyaltyExpanded)}
-              className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-[#2D1810] to-[#452718] text-white text-xs font-bold flex items-center gap-2 shadow-xs hover:opacity-95 transition cursor-pointer"
+              className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-[#C8102E] to-[#A80D26] text-white text-xs font-bold flex items-center gap-2 shadow-xs hover:opacity-95 transition cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#EA580C]" />
+              <Sparkles className="w-3.5 h-3.5 text-[#F59E0B]" />
               <span className="truncate max-w-[110px]">{customer.name.split(' ')[0]}</span>
-              <span className="bg-[#EA580C] text-[10px] px-1.5 py-0.2 rounded-full font-mono">
+              <span className="bg-[#F59E0B] text-stone-900 text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold">
                 {customer.cravingPoints} pts
               </span>
             </button>
@@ -487,9 +487,9 @@ export const TableQROrderPage: React.FC = () => {
                 setOtpStep('PHONE');
                 setIsLoyaltyModalOpen(true);
               }}
-              className="px-3.5 py-1.5 rounded-2xl bg-[#2D1810] text-[#FAF7F2] text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-stone-800 transition cursor-pointer"
+              className="px-3.5 py-1.5 rounded-2xl bg-[#C8102E] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[#A80D26] transition cursor-pointer"
             >
-              <Gift className="w-3.5 h-3.5 text-[#EA580C]" />
+              <Gift className="w-3.5 h-3.5 text-[#F59E0B]" />
               Join Craving Club
             </button>
           )}
@@ -499,22 +499,22 @@ export const TableQROrderPage: React.FC = () => {
       {/* 2. CUSTOMER DIGITAL LOYALTY CARD BANNER */}
       {customer && isLoyaltyExpanded && (
         <section className="max-w-4xl mx-auto px-4 pt-4">
-          <div className="bg-gradient-to-br from-[#2D1810] via-[#3E2723] to-[#1F100A] text-white rounded-3xl p-5 shadow-xl border border-amber-900/40 relative overflow-hidden">
+          <div className="bg-gradient-to-br from-[#C8102E] via-[#A80D26] to-[#670817] text-white rounded-3xl p-5 shadow-xl border border-red-900/40 relative overflow-hidden">
             {/* Background Texture */}
-            <div className="absolute top-0 right-0 w-48 h-48 bg-[#EA580C]/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="flex items-start justify-between relative z-10 mb-4">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#EA580C] bg-[#EA580C]/20 px-2.5 py-0.5 rounded-full">
+                <span className="text-[10px] font-black uppercase tracking-widest text-amber-200 bg-black/20 px-2.5 py-0.5 rounded-full border border-amber-300/30">
                   Craving Club Member Card
                 </span>
                 <h3 className="text-xl font-black mt-1 text-white">{customer.name}</h3>
-                <p className="text-xs text-stone-300 font-mono">+91 {customer.phone}</p>
+                <p className="text-xs text-stone-200 font-mono">+91 {customer.phone}</p>
               </div>
 
               <div className="text-right">
-                <span className="text-[10px] text-stone-300 uppercase tracking-wider">Craving Points</span>
-                <p className="text-2xl font-black font-mono text-[#EA580C]">{customer.cravingPoints}</p>
+                <span className="text-[10px] text-amber-200 uppercase tracking-wider">Craving Points</span>
+                <p className="text-2xl font-black font-mono text-[#F59E0B]">{customer.cravingPoints}</p>
               </div>
             </div>
 
@@ -523,7 +523,7 @@ export const TableQROrderPage: React.FC = () => {
               {/* 01. Earn on Every Craving */}
               <div className="bg-white/5 border border-white/10 rounded-2xl p-3">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300 mb-1">
-                  <Flame className="w-3.5 h-3.5 text-[#EA580C]" />
+                  <Flame className="w-3.5 h-3.5 text-[#F59E0B]" />
                   01. Earn on Craving
                 </div>
                 {/* 5-Stamp Tracker */}
@@ -536,7 +536,7 @@ export const TableQROrderPage: React.FC = () => {
                         className={clsx(
                           'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all',
                           filled
-                            ? 'bg-[#EA580C] text-white border-[#EA580C] shadow-xs'
+                            ? 'bg-[#F59E0B] text-stone-900 border-[#F59E0B] shadow-xs'
                             : 'bg-white/10 text-stone-400 border-white/20'
                         )}
                       >
@@ -590,7 +590,7 @@ export const TableQROrderPage: React.FC = () => {
                   <span className="text-xs font-mono font-bold text-amber-200">{customer.referralCode}</span>
                   <button
                     onClick={copyReferralCode}
-                    className="text-[11px] font-bold text-[#EA580C] hover:text-white transition flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] font-bold text-[#F59E0B] hover:text-white transition flex items-center gap-1 cursor-pointer"
                   >
                     {codeCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                     {codeCopied ? 'Copied' : 'Copy'}
@@ -603,7 +603,7 @@ export const TableQROrderPage: React.FC = () => {
             <div className="text-center mt-3 pt-2 border-t border-white/10">
               <button
                 onClick={() => setIsLoyaltyExpanded(false)}
-                className="text-[11px] text-stone-400 hover:text-white font-medium cursor-pointer"
+                className="text-[11px] text-stone-300 hover:text-white font-medium cursor-pointer"
               >
                 Hide Loyalty Card ▲
               </button>
@@ -623,7 +623,7 @@ export const TableQROrderPage: React.FC = () => {
               placeholder="Search coffee, tea, burgers, rolls..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#2D1810] shadow-2xs"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E] shadow-2xs"
             />
           </div>
 
@@ -648,11 +648,11 @@ export const TableQROrderPage: React.FC = () => {
             className={clsx(
               'px-4 py-2 rounded-2xl text-xs font-bold transition shrink-0 cursor-pointer flex items-center gap-1.5 shadow-2xs',
               selectedCat === 'ALL'
-                ? 'bg-[#2D1810] text-white shadow-xs'
+                ? 'bg-[#C8102E] text-white shadow-xs'
                 : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200/80'
             )}
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#EA580C]" />
+            <Sparkles className="w-3.5 h-3.5 text-[#F59E0B]" />
             All ({menuItems.length})
           </button>
 
@@ -663,12 +663,12 @@ export const TableQROrderPage: React.FC = () => {
               className={clsx(
                 'px-4 py-2 rounded-2xl text-xs font-bold transition shrink-0 cursor-pointer flex items-center gap-1.5 shadow-2xs',
                 selectedCat === c.id
-                  ? 'bg-[#2D1810] text-white shadow-xs'
+                  ? 'bg-[#C8102E] text-white shadow-xs'
                   : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200/80'
               )}
             >
-              {c.name.includes('Coffee') && <Coffee className="w-3.5 h-3.5 text-[#EA580C]" />}
-              {c.name.includes('Tea') && <CupSoda className="w-3.5 h-3.5 text-[#EA580C]" />}
+              {c.name.includes('Coffee') && <Coffee className="w-3.5 h-3.5 text-[#C8102E]" />}
+              {c.name.includes('Tea') && <CupSoda className="w-3.5 h-3.5 text-[#C8102E]" />}
               {c.name}
             </button>
           ))}
@@ -687,7 +687,7 @@ export const TableQROrderPage: React.FC = () => {
               <div
                 key={item.id}
                 onClick={() => handleItemClick(item)}
-                className="bg-white rounded-3xl border border-stone-200/90 hover:border-[#EA580C] hover:shadow-md transition cursor-pointer flex flex-col justify-between overflow-hidden shadow-2xs select-none group min-h-[230px]"
+                className="bg-white rounded-3xl border border-stone-200/90 hover:border-[#C8102E] hover:shadow-md transition cursor-pointer flex flex-col justify-between overflow-hidden shadow-2xs select-none group min-h-[230px]"
               >
                 {/* Photo Canvas */}
                 <div className="relative w-full h-36 bg-stone-100 overflow-hidden shrink-0">
@@ -721,7 +721,7 @@ export const TableQROrderPage: React.FC = () => {
                   {/* Special Badges */}
                   <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end z-10">
                     {item.is_chef_special && (
-                      <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-[#EA580C] text-white shadow-xs">
+                      <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-[#C8102E] text-white shadow-xs">
                         ★ Chef Special
                       </span>
                     )}
@@ -736,7 +736,7 @@ export const TableQROrderPage: React.FC = () => {
                 {/* Details */}
                 <div className="p-3.5 flex-1 flex flex-col justify-between min-h-[90px]">
                   <div>
-                    <h3 className="text-sm font-bold text-[#2D1810] group-hover:text-[#EA580C] transition-colors leading-snug">
+                    <h3 className="text-sm font-bold text-stone-900 group-hover:text-[#C8102E] transition-colors leading-snug">
                       {item.name}
                     </h3>
                     <p className="text-[11px] text-stone-500 line-clamp-1 mt-0.5">
@@ -745,7 +745,7 @@ export const TableQROrderPage: React.FC = () => {
                   </div>
 
                   <div className="mt-2 pt-2 border-t border-stone-100 flex items-center justify-between">
-                    <span className="text-sm font-mono font-black text-[#2D1810]">
+                    <span className="text-sm font-mono font-black text-stone-900">
                       ₹{displayPrice}
                     </span>
 
@@ -755,7 +755,7 @@ export const TableQROrderPage: React.FC = () => {
                         e.stopPropagation();
                         handleItemClick(item);
                       }}
-                      className="px-3 py-1 rounded-xl bg-[#FFF7ED] text-[#EA580C] group-hover:bg-[#EA580C] group-hover:text-white transition-all text-xs font-bold flex items-center gap-1 shadow-2xs cursor-pointer"
+                      className="px-3 py-1 rounded-xl bg-[#FDF2F3] text-[#C8102E] group-hover:bg-[#C8102E] group-hover:text-white transition-all text-xs font-bold flex items-center gap-1 shadow-2xs cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Add
@@ -774,8 +774,8 @@ export const TableQROrderPage: React.FC = () => {
           <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-lg w-full p-5 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-start justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="text-[10px] font-black uppercase text-[#EA580C]">Customize Item</span>
-                <h3 className="text-base font-bold text-[#2D1810]">{customizingItem.name}</h3>
+                <span className="text-[10px] font-black uppercase text-[#C8102E]">Customize Item</span>
+                <h3 className="text-base font-bold text-stone-900">{customizingItem.name}</h3>
                 <p className="text-xs text-stone-500">{customizingItem.description}</p>
               </div>
               <button
@@ -801,12 +801,12 @@ export const TableQROrderPage: React.FC = () => {
                       className={clsx(
                         'p-2.5 rounded-2xl border text-xs font-bold flex items-center justify-between transition cursor-pointer',
                         selectedVariant?.id === v.id
-                          ? 'border-[#EA580C] bg-[#FFF7ED] text-[#2D1810] shadow-xs'
+                          ? 'border-[#C8102E] bg-[#FDF2F3] text-stone-900 shadow-xs'
                           : 'border-stone-200 text-stone-600 hover:bg-stone-50'
                       )}
                     >
                       <span>{v.variant_name}</span>
-                      <span className="font-mono text-[#EA580C]">₹{v.price}</span>
+                      <span className="font-mono text-[#C8102E]">₹{v.price}</span>
                     </button>
                   ))}
                 </div>
@@ -836,7 +836,7 @@ export const TableQROrderPage: React.FC = () => {
                       className={clsx(
                         'px-2.5 py-1 rounded-xl text-[11px] font-bold border transition cursor-pointer',
                         active
-                          ? 'bg-[#2D1810] text-white border-[#2D1810]'
+                          ? 'bg-[#C8102E] text-white border-[#C8102E]'
                           : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
                       )}
                     >
@@ -850,7 +850,7 @@ export const TableQROrderPage: React.FC = () => {
                 placeholder="Other custom preferences (e.g., less spicy)..."
                 value={customInstructions}
                 onChange={(e) => setCustomInstructions(e.target.value)}
-                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#2D1810]"
+                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
               />
             </div>
 
@@ -858,7 +858,7 @@ export const TableQROrderPage: React.FC = () => {
             <div className="mt-5 pt-3 border-t border-stone-100 flex items-center justify-between">
               <div>
                 <span className="text-[10px] text-stone-400 uppercase">Item Total</span>
-                <p className="text-base font-black font-mono text-[#2D1810]">
+                <p className="text-base font-black font-mono text-stone-900">
                   ₹{selectedVariant ? selectedVariant.price : customizingItem.price}
                 </p>
               </div>
@@ -874,9 +874,9 @@ export const TableQROrderPage: React.FC = () => {
                     customInstructions.trim()
                   );
                 }}
-                className="px-6 py-2.5 rounded-2xl bg-[#2D1810] text-white text-xs font-bold hover:bg-stone-800 transition shadow-md cursor-pointer flex items-center gap-1.5"
+                className="px-6 py-2.5 rounded-2xl bg-[#C8102E] text-white text-xs font-bold hover:bg-[#A80D26] transition shadow-md cursor-pointer flex items-center gap-1.5"
               >
-                <Plus className="w-4 h-4 text-[#EA580C]" />
+                <Plus className="w-4 h-4 text-[#F59E0B]" />
                 Add to Table Cart
               </button>
             </div>
@@ -887,14 +887,14 @@ export const TableQROrderPage: React.FC = () => {
       {/* 6. FLOATING TABLE CART BAR */}
       {cart.length > 0 && (
         <div className="fixed bottom-4 left-4 right-4 z-40 max-w-2xl mx-auto">
-          <div className="bg-[#2D1810] text-white p-3.5 rounded-3xl shadow-2xl flex items-center justify-between border border-amber-900/40 backdrop-blur-md">
+          <div className="bg-[#C8102E] text-white p-3.5 rounded-3xl shadow-2xl flex items-center justify-between border border-red-900/40 backdrop-blur-md">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#EA580C] text-white flex items-center justify-center font-bold text-sm shadow-md">
+              <div className="w-10 h-10 rounded-2xl bg-[#F59E0B] text-stone-900 flex items-center justify-center font-bold text-sm shadow-md">
                 {cart.reduce((s, it) => s + it.quantity, 0)}
               </div>
               <div>
                 <p className="text-xs font-bold">Table {table?.table_number} Cart</p>
-                <p className="text-[11px] text-stone-300 font-mono">
+                <p className="text-[11px] text-stone-200 font-mono">
                   Total: ₹{grandTotal.toFixed(2)} (incl. GST)
                 </p>
               </div>
@@ -902,9 +902,9 @@ export const TableQROrderPage: React.FC = () => {
 
             <button
               onClick={() => setIsCartOpen(true)}
-              className="px-5 py-2.5 bg-white text-[#2D1810] text-xs font-bold rounded-2xl hover:bg-stone-100 transition shadow-md flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 bg-white text-[#C8102E] text-xs font-bold rounded-2xl hover:bg-stone-100 transition shadow-md flex items-center gap-1.5 cursor-pointer"
             >
-              <ShoppingBag className="w-3.5 h-3.5 text-[#EA580C]" />
+              <ShoppingBag className="w-3.5 h-3.5 text-[#C8102E]" />
               View Cart & Order
             </button>
           </div>
@@ -918,8 +918,8 @@ export const TableQROrderPage: React.FC = () => {
             {/* Header */}
             <div className="flex items-start justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="text-[10px] font-black uppercase text-[#EA580C]">Review Table Order</span>
-                <h3 className="text-base font-bold text-[#2D1810]">
+                <span className="text-[10px] font-black uppercase text-[#C8102E]">Review Table Order</span>
+                <h3 className="text-base font-bold text-stone-900">
                   Table {table?.table_number} · {table?.section}
                 </h3>
               </div>
@@ -936,7 +936,7 @@ export const TableQROrderPage: React.FC = () => {
               {cart.map((it) => (
                 <div key={it.cartId} className="pt-2.5 first:pt-0 flex items-center justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-xs font-bold text-[#2D1810] truncate">
+                    <h4 className="text-xs font-bold text-stone-900 truncate">
                       {it.name} {it.variantName && it.variantName !== 'Single' && `(${it.variantName})`}
                     </h4>
                     {it.notes && (
@@ -960,7 +960,7 @@ export const TableQROrderPage: React.FC = () => {
                     <span className="text-xs font-mono font-bold px-1.5">{it.quantity}</span>
                     <button
                       onClick={() => updateQuantity(it.cartId, 1)}
-                      className="w-6 h-6 rounded-lg bg-[#2D1810] text-white flex items-center justify-center hover:bg-stone-800 shadow-2xs cursor-pointer"
+                      className="w-6 h-6 rounded-lg bg-[#C8102E] text-white flex items-center justify-center hover:bg-[#A80D26] shadow-2xs cursor-pointer"
                     >
                       <Plus className="w-3 h-3" />
                     </button>
@@ -971,8 +971,8 @@ export const TableQROrderPage: React.FC = () => {
 
             {/* Loyalty Perks & Vouchers Applicator */}
             {customer && perks && (
-              <div className="py-2.5 border-y border-stone-100 bg-[#FAF7F2] -mx-5 px-5 my-2">
-                <span className="text-[10px] font-bold text-[#EA580C] uppercase tracking-wider block mb-1">
+              <div className="py-2.5 border-y border-stone-100 bg-[#FFFDF9] -mx-5 px-5 my-2">
+                <span className="text-[10px] font-bold text-[#C8102E] uppercase tracking-wider block mb-1">
                   Craving Club Perks Available
                 </span>
 
@@ -997,7 +997,7 @@ export const TableQROrderPage: React.FC = () => {
                       )}
                     >
                       <span className="flex items-center gap-1.5">
-                        <Flame className="w-3.5 h-3.5 text-[#EA580C]" />
+                        <Flame className="w-3.5 h-3.5 text-[#C8102E]" />
                         10% Streak Discount (Orders &gt; ₹300)
                       </span>
                       <span>{appliedDiscount === 10 ? 'Applied ✓' : 'Apply'}</span>
@@ -1033,9 +1033,9 @@ export const TableQROrderPage: React.FC = () => {
                 <span>GST (5.0%)</span>
                 <span className="font-mono">₹{taxAmount.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-sm font-black text-[#2D1810] pt-2 border-t border-stone-200">
+              <div className="flex justify-between text-sm font-black text-stone-900 pt-2 border-t border-stone-200">
                 <span>Total Amount Payable</span>
-                <span className="font-mono text-[#EA580C]">₹{grandTotal.toFixed(2)}</span>
+                <span className="font-mono text-[#C8102E]">₹{grandTotal.toFixed(2)}</span>
               </div>
             </div>
 
@@ -1046,7 +1046,7 @@ export const TableQROrderPage: React.FC = () => {
                 placeholder="Special table notes (e.g., serve drinks first)..."
                 value={orderNotes}
                 onChange={(e) => setOrderNotes(e.target.value)}
-                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#2D1810]"
+                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
               />
             </div>
 
@@ -1056,9 +1056,9 @@ export const TableQROrderPage: React.FC = () => {
                 type="button"
                 disabled={isSubmitting}
                 onClick={handlePlaceTableOrder}
-                className="w-full py-3 rounded-2xl bg-[#2D1810] text-white text-sm font-bold hover:bg-stone-800 transition shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full py-3 rounded-2xl bg-[#C8102E] text-white text-sm font-bold hover:bg-[#A80D26] transition shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
-                <ChefHat className="w-4 h-4 text-[#EA580C]" />
+                <ChefHat className="w-4 h-4 text-[#F59E0B]" />
                 {isSubmitting ? 'Sending to Kitchen...' : `Confirm & Send to Kitchen (₹${grandTotal.toFixed(2)})`}
               </button>
             </div>
@@ -1078,10 +1078,10 @@ export const TableQROrderPage: React.FC = () => {
             </button>
 
             <div className="text-center mb-5">
-              <div className="w-12 h-12 rounded-2xl bg-[#2D1810] text-[#EA580C] flex items-center justify-center mx-auto mb-2 font-black text-xl shadow-md">
+              <div className="w-12 h-12 rounded-2xl bg-[#C8102E] text-white flex items-center justify-center mx-auto mb-2 font-black text-xl shadow-md">
                 R
               </div>
-              <h3 className="text-lg font-black text-[#2D1810]">Join Craving Club</h3>
+              <h3 className="text-lg font-black text-stone-900">Join Craving Club</h3>
               <p className="text-xs text-stone-500 mt-0.5">
                 Earn rewards on every craving, birthday surprises & friend referral treats!
               </p>
@@ -1103,7 +1103,7 @@ export const TableQROrderPage: React.FC = () => {
                       placeholder="98765 43210"
                       value={phoneInput}
                       onChange={(e) => setPhoneInput(e.target.value)}
-                      className="w-full pl-12 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#2D1810]"
+                      className="w-full pl-12 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
                       autoFocus
                     />
                   </div>
@@ -1113,7 +1113,7 @@ export const TableQROrderPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={otpSending}
-                  className="w-full py-2.5 bg-[#2D1810] text-white text-xs font-bold rounded-2xl hover:bg-stone-800 transition shadow-md cursor-pointer disabled:opacity-50"
+                  className="w-full py-2.5 bg-[#C8102E] text-white text-xs font-bold rounded-2xl hover:bg-[#A80D26] transition shadow-md cursor-pointer disabled:opacity-50"
                 >
                   {otpSending ? 'Sending OTP...' : 'Send OTP Code →'}
                 </button>
@@ -1134,14 +1134,14 @@ export const TableQROrderPage: React.FC = () => {
                     maxLength={4}
                     value={otpInput}
                     onChange={(e) => setOtpInput(e.target.value)}
-                    className="w-full text-center tracking-widest text-lg font-mono font-black py-2 bg-stone-50 border border-stone-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#2D1810]"
+                    className="w-full text-center tracking-widest text-lg font-mono font-black py-2 bg-stone-50 border border-stone-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
                   />
                   <div className="flex justify-between items-center mt-1">
                     <p className="text-[10px] text-stone-400">Demo Code: 1234</p>
                     <button
                       type="button"
                       onClick={() => setOtpInput('1234')}
-                      className="text-[10px] text-[#EA580C] font-bold underline cursor-pointer"
+                      className="text-[10px] text-[#C8102E] font-bold underline cursor-pointer"
                     >
                       Autofill 1234
                     </button>
@@ -1156,7 +1156,7 @@ export const TableQROrderPage: React.FC = () => {
                     placeholder="e.g. Rahul Sharma"
                     value={nameInput}
                     onChange={(e) => setNameInput(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#2D1810]"
+                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
                   />
                 </div>
 
@@ -1169,7 +1169,7 @@ export const TableQROrderPage: React.FC = () => {
                     type="date"
                     value={dobInput}
                     onChange={(e) => setDobInput(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#2D1810]"
+                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
                   />
                 </div>
 
@@ -1182,7 +1182,7 @@ export const TableQROrderPage: React.FC = () => {
                     placeholder="e.g. ROLL-PRIYA-04"
                     value={referralInput}
                     onChange={(e) => setReferralInput(e.target.value.toUpperCase())}
-                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#2D1810]"
+                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
                   />
                 </div>
 
@@ -1191,7 +1191,7 @@ export const TableQROrderPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={otpSending}
-                  className="w-full py-2.5 bg-[#2D1810] text-white text-xs font-bold rounded-2xl hover:bg-stone-800 transition shadow-md cursor-pointer disabled:opacity-50 mt-2"
+                  className="w-full py-2.5 bg-[#C8102E] text-white text-xs font-bold rounded-2xl hover:bg-[#A80D26] transition shadow-md cursor-pointer disabled:opacity-50 mt-2"
                 >
                   {otpSending ? 'Activating Perks...' : 'Verify & Enter Craving Club 🎉'}
                 </button>
@@ -1203,7 +1203,7 @@ export const TableQROrderPage: React.FC = () => {
 
       {/* 9. LIVE ORDER TRACKING SCREEN */}
       {placedOrder && (
-        <div className="fixed inset-0 z-50 bg-[#FAF7F2] flex flex-col items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-[#FFFDF9] flex flex-col items-center justify-center p-4">
           <div className="max-w-md w-full bg-white rounded-3xl border border-stone-200/80 p-6 shadow-2xl text-center">
             <div className="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto mb-3 shadow-sm">
               <CheckCircle2 className="w-8 h-8 text-emerald-600" />
@@ -1213,11 +1213,11 @@ export const TableQROrderPage: React.FC = () => {
               Order Dispatched to Kitchen
             </span>
 
-            <h2 className="text-xl font-black text-[#2D1810] mt-2">
+            <h2 className="text-xl font-black text-stone-900 mt-2">
               Order #{placedOrder.orderNumber}
             </h2>
             <p className="text-xs text-stone-500 font-medium mt-0.5">
-              Serving at Table <span className="font-bold text-[#2D1810]">{placedOrder.tableNumber}</span> · {placedOrder.section}
+              Serving at Table <span className="font-bold text-[#C8102E]">{placedOrder.tableNumber}</span> · {placedOrder.section}
             </p>
 
             {/* Live Progress Tracker */}
@@ -1245,12 +1245,12 @@ export const TableQROrderPage: React.FC = () => {
             </div>
 
             {/* Points Earned Banner */}
-            <div className="p-3 bg-gradient-to-r from-[#2D1810] to-[#452718] text-white rounded-2xl mb-4 flex items-center justify-between text-left">
+            <div className="p-3 bg-gradient-to-r from-[#C8102E] to-[#870A1E] text-white rounded-2xl mb-4 flex items-center justify-between text-left">
               <div>
                 <p className="text-[10px] uppercase font-bold text-amber-300">Craving Points Earned</p>
                 <p className="text-xs font-bold">+{placedOrder.earnedPoints || 15} Points Credited!</p>
               </div>
-              <Sparkles className="w-5 h-5 text-[#EA580C]" />
+              <Sparkles className="w-5 h-5 text-[#F59E0B]" />
             </div>
 
             <button

@@ -241,12 +241,12 @@ export const MenuPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredItems.length === 0 ? (
           <div className="col-span-full py-16 flex flex-col items-center justify-center text-center bg-white rounded-2xl border border-stone-200 p-8 shadow-xs">
-            <div className="w-16 h-16 rounded-full bg-[#FAF7F2] border border-amber-200 flex items-center justify-center mb-3">
-              <UtensilsCrossed className="w-8 h-8 text-[#C67D3A]" />
+            <div className="w-16 h-16 rounded-full bg-red-50 border border-red-200 flex items-center justify-center mb-3">
+              <UtensilsCrossed className="w-8 h-8 text-[#C8102E]" />
             </div>
-            <h3 className="text-base font-bold text-stone-900 mb-1">No cafe menu items match the filter</h3>
+            <h3 className="text-base font-bold text-stone-900 mb-1">No menu items match the filter</h3>
             <p className="text-xs text-stone-500 max-w-sm mb-4">
-              Try selecting another category or clearing search filters to browse our fresh coffee, tea, beverages, snacks, burgers & desserts.
+              Try selecting another category or clearing search filters to browse our fresh rolls, coffee, tea, beverages, snacks, burgers & desserts.
             </p>
             <button
               onClick={() => {
@@ -254,7 +254,7 @@ export const MenuPage: React.FC = () => {
                 setSearch('');
                 setVegOnly(false);
               }}
-              className="px-5 py-2 bg-[#2D1810] hover:bg-[#3E2723] text-white text-xs font-bold rounded-xl transition shadow-xs"
+              className="px-5 py-2 bg-[#C8102E] hover:bg-[#A80D26] text-white text-xs font-bold rounded-xl transition shadow-xs"
             >
               Show All Menu Items ({items.length})
             </button>

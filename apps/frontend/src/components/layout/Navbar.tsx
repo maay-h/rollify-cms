@@ -200,7 +200,7 @@ export const Navbar: React.FC = () => {
                   clsx(
                     'flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition',
                     isActive
-                      ? 'bg-[#2D1810] text-white shadow-xs'
+                      ? 'bg-[#C8102E] text-white shadow-xs'
                       : 'text-stone-700 hover:bg-stone-100'
                   )
                 }

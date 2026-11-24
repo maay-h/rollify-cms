@@ -206,9 +206,9 @@ export const TablesPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setQrModalTable(table)}
-                className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FAF7F2] text-[#2D1810] hover:bg-stone-200 border border-stone-200 font-mono text-[10px] font-bold transition cursor-pointer"
+                className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-red-50 text-[#C8102E] hover:bg-red-100 border border-red-200 font-mono text-[10px] font-bold transition cursor-pointer"
               >
-                <QrCode className="w-3.5 h-3.5 text-[#EA580C]" />
+                <QrCode className="w-3.5 h-3.5 text-[#C8102E]" />
                 View QR Tent Card
               </button>
             </div>
@@ -304,25 +304,25 @@ export const TablesPage: React.FC = () => {
                 {/* Physical Tent Card Mockup / Print View */}
                 <div
                   id="printable-tent-card"
-                  className="bg-white border-2 border-[#2D1810] rounded-3xl p-6 text-center shadow-lg relative overflow-hidden"
+                  className="bg-white border-2 border-[#C8102E] rounded-3xl p-6 text-center shadow-lg relative overflow-hidden"
                 >
-                  <div className="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-[#2D1810] via-[#EA580C] to-[#2D1810]" />
+                  <div className="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-[#C8102E] via-[#F59E0B] to-[#C8102E]" />
 
                   {/* Brand Header */}
                   <div className="flex items-center justify-center gap-2 mb-2 mt-2">
-                    <div className="w-8 h-8 rounded-xl bg-[#2D1810] text-[#EA580C] flex items-center justify-center font-black text-sm">
+                    <div className="w-8 h-8 rounded-xl bg-[#C8102E] text-[#F59E0B] flex items-center justify-center font-black text-sm shadow-xs">
                       R
                     </div>
-                    <span className="text-base font-black tracking-tight text-[#2D1810]">
+                    <span className="text-base font-black tracking-tight text-[#18181B]">
                       ROLLIFY CAFE
                     </span>
                   </div>
 
-                  <span className="text-[10px] font-black uppercase tracking-widest text-[#EA580C] bg-[#FFF7ED] px-3 py-0.5 rounded-full border border-orange-200">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[#C8102E] bg-red-50 px-3 py-0.5 rounded-full border border-red-200">
                     {qrModalTable.section}
                   </span>
 
-                  <h2 className="text-3xl font-black text-[#2D1810] mt-2 mb-1 tracking-tight">
+                  <h2 className="text-3xl font-black text-[#18181B] mt-2 mb-1 tracking-tight">
                     TABLE {qrModalTable.table_number}
                   </h2>
                   <p className="text-xs text-stone-500 font-medium max-w-xs mx-auto mb-4">
@@ -340,8 +340,8 @@ export const TablesPage: React.FC = () => {
 
                   {/* Loyalty Perks Inside */}
                   <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-around text-[10px] font-bold text-stone-600">
-                    <span className="flex items-center gap-1 text-[#EA580C]">
-                      <Sparkles className="w-3 h-3" /> Earn on Every Craving
+                    <span className="flex items-center gap-1 text-[#C8102E]">
+                      <Sparkles className="w-3 h-3 text-[#F59E0B]" /> Earn on Every Craving
                     </span>
                     <span className="text-stone-300">·</span>
                     <span>🎂 Birthday Month Treat</span>
@@ -376,8 +376,8 @@ export const TablesPage: React.FC = () => {
                   </Button>
                   <Button
                     variant="primary"
-                    className="flex-1 bg-[#2D1810] hover:bg-stone-800 text-white"
-                    leftIcon={<Printer className="w-4 h-4 text-[#EA580C]" />}
+                    className="flex-1 bg-[#C8102E] hover:bg-[#A80D26] text-white"
+                    leftIcon={<Printer className="w-4 h-4 text-[#F59E0B]" />}
                     onClick={() => {
                       window.print();
                     }}
