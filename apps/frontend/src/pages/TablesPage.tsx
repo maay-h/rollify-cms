@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button.js';
 import { Badge } from '../components/ui/Badge.js';
 import { ConfirmationDialog } from '../components/ui/ConfirmationDialog.js';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner.js';
+import { Modal } from '../components/ui/Modal.js';
 import { 
   UtensilsCrossed, 
   Users, 
@@ -13,7 +14,11 @@ import {
   CheckCircle2, 
   Clock, 
   AlertCircle, 
-  RefreshCw 
+  RefreshCw,
+  Printer,
+  ExternalLink,
+  Copy,
+  Sparkles
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { DEMO_TABLES } from '../mock/demoStore.js';
@@ -42,6 +47,7 @@ export const TablesPage: React.FC = () => {
   const [newStatus, setNewStatus] = useState<DiningTable['status']>('AVAILABLE');
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [qrModalTable, setQrModalTable] = useState<DiningTable | null>(null);
 
   const fetchTables = async () => {
     try {
@@ -192,15 +198,19 @@ export const TablesPage: React.FC = () => {
               </Badge>
             </div>
 
-            <div className="flex items-center gap-4 py-2 border-y border-stone-200/40 text-xs text-stone-600 font-medium">
+            <div className="flex items-center justify-between py-2 border-y border-stone-200/40 text-xs text-stone-600 font-medium">
               <span className="flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5 text-stone-400" />
                 {table.capacity} Guests
               </span>
-              <span className="flex items-center gap-1.5 font-mono text-[10px]">
-                <QrCode className="w-3.5 h-3.5 text-stone-400" />
-                {table.qr_token.slice(0, 10)}...
-              </span>
+              <button
+                type="button"
+                onClick={() => setQrModalTable(table)}
+                className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FAF7F2] text-[#2D1810] hover:bg-stone-200 border border-stone-200 font-mono text-[10px] font-bold transition cursor-pointer"
+              >
+                <QrCode className="w-3.5 h-3.5 text-[#EA580C]" />
+                View QR Tent Card
+              </button>
             </div>
 
             {/* Quick Status Action Buttons */}
@@ -276,6 +286,110 @@ export const TablesPage: React.FC = () => {
         variant="warning"
         isLoading={isUpdating}
       />
+
+      {/* Printable QR Tent Card Modal */}
+      {qrModalTable && (
+        <Modal
+          isOpen={!!qrModalTable}
+          onClose={() => setQrModalTable(null)}
+          title={`Table ${qrModalTable.table_number} Digital Ordering QR`}
+          maxWidth="md"
+        >
+          {(() => {
+            const tableUrl = `${window.location.origin}/table/${encodeURIComponent(qrModalTable.qr_token)}`;
+            const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(tableUrl)}`;
+
+            return (
+              <div className="space-y-4">
+                {/* Physical Tent Card Mockup / Print View */}
+                <div
+                  id="printable-tent-card"
+                  className="bg-white border-2 border-[#2D1810] rounded-3xl p-6 text-center shadow-lg relative overflow-hidden"
+                >
+                  <div className="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-[#2D1810] via-[#EA580C] to-[#2D1810]" />
+
+                  {/* Brand Header */}
+                  <div className="flex items-center justify-center gap-2 mb-2 mt-2">
+                    <div className="w-8 h-8 rounded-xl bg-[#2D1810] text-[#EA580C] flex items-center justify-center font-black text-sm">
+                      R
+                    </div>
+                    <span className="text-base font-black tracking-tight text-[#2D1810]">
+                      ROLLIFY CAFE
+                    </span>
+                  </div>
+
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[#EA580C] bg-[#FFF7ED] px-3 py-0.5 rounded-full border border-orange-200">
+                    {qrModalTable.section}
+                  </span>
+
+                  <h2 className="text-3xl font-black text-[#2D1810] mt-2 mb-1 tracking-tight">
+                    TABLE {qrModalTable.table_number}
+                  </h2>
+                  <p className="text-xs text-stone-500 font-medium max-w-xs mx-auto mb-4">
+                    Scan with your phone camera to order directly from this table & join Craving Club.
+                  </p>
+
+                  {/* High Quality QR Canvas */}
+                  <div className="w-48 h-48 mx-auto p-3 bg-white rounded-2xl border-2 border-stone-200 shadow-sm flex items-center justify-center">
+                    <img
+                      src={qrImgUrl}
+                      alt={`Table ${qrModalTable.table_number} QR Code`}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+
+                  {/* Loyalty Perks Inside */}
+                  <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-around text-[10px] font-bold text-stone-600">
+                    <span className="flex items-center gap-1 text-[#EA580C]">
+                      <Sparkles className="w-3 h-3" /> Earn on Every Craving
+                    </span>
+                    <span className="text-stone-300">·</span>
+                    <span>🎂 Birthday Month Treat</span>
+                    <span className="text-stone-300">·</span>
+                    <span>🎁 Friend Referrals</span>
+                  </div>
+                </div>
+
+                {/* Direct Link and Actions */}
+                <div className="p-3 bg-stone-50 rounded-2xl border border-stone-200 flex items-center justify-between text-xs font-mono">
+                  <span className="truncate max-w-[260px] text-stone-600">{tableUrl}</span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(tableUrl);
+                      toast.success('Link Copied', 'Table QR URL copied to clipboard');
+                    }}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-stone-200 font-sans font-bold text-stone-700 hover:bg-stone-100 transition cursor-pointer shrink-0 ml-2 shadow-2xs"
+                  >
+                    <Copy className="w-3.5 h-3.5" /> Copy
+                  </button>
+                </div>
+
+                {/* Print & Test Buttons */}
+                <div className="flex items-center gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    leftIcon={<ExternalLink className="w-4 h-4" />}
+                    onClick={() => window.open(tableUrl, '_blank')}
+                  >
+                    Open Live Customer Menu
+                  </Button>
+                  <Button
+                    variant="primary"
+                    className="flex-1 bg-[#2D1810] hover:bg-stone-800 text-white"
+                    leftIcon={<Printer className="w-4 h-4 text-[#EA580C]" />}
+                    onClick={() => {
+                      window.print();
+                    }}
+                  >
+                    Print Acrylic Tent Card
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
+        </Modal>
+      )}
     </div>
   );
 };

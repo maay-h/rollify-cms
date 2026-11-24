@@ -14,6 +14,7 @@ import { OrdersListPage } from './pages/OrdersListPage.js';
 import { KitchenDisplayPage } from './pages/KitchenDisplayPage.js';
 import { BillingCheckoutPage } from './pages/BillingCheckoutPage.js';
 import { AnalyticsReportsPage } from './pages/AnalyticsReportsPage.js';
+import { TableQROrderPage } from './pages/TableQROrderPage.js';
 import { LoadingSpinner } from './components/ui/LoadingSpinner.js';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -43,6 +44,13 @@ export const App: React.FC = () => {
             <Routes>
               {/* Public Login Route */}
               <Route path="/login" element={<LoginPage />} />
+
+              {/* Public Customer Table QR & Loyalty Ordering Routes */}
+              <Route path="/table/:qrToken" element={<TableQROrderPage />} />
+              <Route path="/order/table/:qrToken" element={<TableQROrderPage />} />
+              <Route path="/qr/:qrToken" element={<TableQROrderPage />} />
+              <Route path="/table" element={<TableQROrderPage />} />
+              <Route path="/loyalty" element={<TableQROrderPage />} />
 
               {/* Protected App Routes */}
               <Route

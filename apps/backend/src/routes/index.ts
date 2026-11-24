@@ -10,6 +10,7 @@ import { inventoryRouter } from './inventory.js';
 import { expensesRouter } from './expenses.js';
 import { shiftsRouter } from './shifts.js';
 import { analyticsRouter } from './analytics.js';
+import { customerQrRouter } from './customerQr.js';
 
 export const apiRouter = Router();
 
@@ -24,3 +25,5 @@ apiRouter.use('/inventory', inventoryRouter);
 apiRouter.use('/expenses', expensesRouter);
 apiRouter.use('/shifts', shiftsRouter);
 apiRouter.use('/analytics', analyticsRouter);
+apiRouter.use('/public', customerQrRouter);
+apiRouter.use('/customer-qr', customerQrRouter);

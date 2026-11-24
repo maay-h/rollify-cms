@@ -664,6 +664,255 @@ export function initDemoInterceptor() {
       });
     }
 
+    // ==========================================
+    // 12. TABLE QR ORDERING & CUSTOMER LOYALTY
+    // ==========================================
+    if ((path.startsWith('/api/public/table/') || path.startsWith('/api/customer-qr/table/')) && method === 'GET') {
+      const qrToken = decodeURIComponent(path.split('/').pop() || '');
+      const table = store.tables.find((t: any) => 
+        t.qr_token === qrToken || 
+        t.id === qrToken || 
+        t.table_number.toLowerCase() === qrToken.toLowerCase() ||
+        t.table_number.toLowerCase() === `t-${qrToken.toLowerCase()}` ||
+        `tbl-${qrToken.padStart(2, '0')}` === t.id
+      ) || store.tables[0];
+
+      const cats = store.categories && store.categories.length > 0 ? store.categories : DEMO_CATEGORIES;
+      const items = store.items && store.items.length > 0 ? store.items : DEMO_MENU_ITEMS;
+
+      return makeRes({
+        success: true,
+        data: {
+          table,
+          categories: cats,
+          menuItems: items,
+        },
+      });
+    }
+
+    if ((path === '/api/public/customer/send-otp' || path === '/api/customer-qr/customer/send-otp') && method === 'POST') {
+      const phone = (body.phone || '').replace(/[^0-9]/g, '').slice(-10);
+      return makeRes({
+        success: true,
+        message: `OTP sent successfully to +91 ${phone}`,
+        data: {
+          phone,
+          demoOtp: '1234',
+        },
+      });
+    }
+
+    if ((path === '/api/public/customer/verify-otp' || path === '/api/customer-qr/customer/verify-otp') && method === 'POST') {
+      const phone = (body.phone || '').replace(/[^0-9]/g, '').slice(-10);
+      const name = body.name?.trim() || `Diner ${phone.slice(-4)}`;
+      const dob = body.dob || '';
+      let birthMonth: number | null = null;
+      if (dob) {
+        const parts = dob.split('-');
+        if (parts.length >= 2) birthMonth = parseInt(parts[1], 10);
+      }
+
+      if (!store.customers) {
+        store.customers = [];
+      }
+
+      let customer = store.customers.find((c: any) => c.phone === phone);
+      const currentMonth = new Date().getMonth() + 1;
+
+      if (!customer) {
+        const firstName = name.split(' ')[0].toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5) || 'ROLL';
+        const referralCode = `ROLL-${firstName}-${phone.slice(-3)}`;
+        let initialPoints = 50;
+        if (body.referralCode && body.referralCode.trim()) {
+          initialPoints += 50;
+        }
+
+        customer = {
+          id: `cust-${Date.now()}`,
+          phone,
+          name,
+          dob,
+          birth_month: birthMonth,
+          referral_code: referralCode,
+          referred_by: body.referralCode || null,
+          craving_points: initialPoints,
+          total_orders: 0,
+          current_streak: 0,
+          streak_unlocked_at: null,
+          created_at: new Date().toISOString(),
+        };
+        store.customers.push(customer);
+        saveStore(store);
+      } else {
+        if (name && !customer.name.startsWith('Diner')) customer.name = name;
+        if (dob) {
+          customer.dob = dob;
+          customer.birth_month = birthMonth;
+        }
+        saveStore(store);
+      }
+
+      const isBirthdayMonth = customer.birth_month === currentMonth;
+      const isStreakActive = customer.streak_unlocked_at 
+        ? new Date(customer.streak_unlocked_at).getTime() > Date.now() 
+        : false;
+
+      return makeRes({
+        success: true,
+        data: {
+          customer: {
+            id: customer.id,
+            name: customer.name,
+            phone: customer.phone,
+            dob: customer.dob,
+            birthMonth: customer.birth_month,
+            referralCode: customer.referral_code,
+            cravingPoints: customer.craving_points,
+            totalOrders: customer.total_orders,
+            currentStreak: customer.current_streak,
+          },
+          perks: {
+            isBirthdayMonth,
+            birthdayTreatAvailable: isBirthdayMonth,
+            isStreakDiscountActive: isStreakActive,
+            streakDiscountPercent: 10,
+            nextFreeDishIn: Math.max(0, 5 - (customer.current_streak % 5)),
+            freeDishUnlocked: customer.total_orders > 0 && customer.current_streak % 5 === 0,
+          },
+        },
+      });
+    }
+
+    if ((path.startsWith('/api/public/customer/loyalty/') || path.startsWith('/api/customer-qr/customer/loyalty/')) && method === 'GET') {
+      const phone = decodeURIComponent(path.split('/').pop() || '').replace(/[^0-9]/g, '').slice(-10);
+      if (!store.customers) store.customers = [];
+      const customer = store.customers.find((c: any) => c.phone === phone);
+      if (!customer) {
+        return makeRes({ success: false, error: 'Customer loyalty account not found' }, 404);
+      }
+      const currentMonth = new Date().getMonth() + 1;
+      const isBirthdayMonth = customer.birth_month === currentMonth;
+      const isStreakActive = customer.streak_unlocked_at 
+        ? new Date(customer.streak_unlocked_at).getTime() > Date.now() 
+        : false;
+
+      return makeRes({
+        success: true,
+        data: {
+          customer: {
+            id: customer.id,
+            name: customer.name,
+            phone: customer.phone,
+            dob: customer.dob,
+            birthMonth: customer.birth_month,
+            referralCode: customer.referral_code,
+            cravingPoints: customer.craving_points,
+            totalOrders: customer.total_orders,
+            currentStreak: customer.current_streak,
+          },
+          perks: {
+            isBirthdayMonth,
+            birthdayTreatAvailable: isBirthdayMonth,
+            isStreakDiscountActive: isStreakActive,
+            streakDiscountPercent: 10,
+            nextFreeDishIn: Math.max(0, 5 - (customer.current_streak % 5)),
+            freeDishUnlocked: customer.total_orders > 0 && customer.current_streak % 5 === 0,
+          },
+        },
+      });
+    }
+
+    if ((path === '/api/public/table-order' || path === '/api/customer-qr/table-order') && method === 'POST') {
+      const table = store.tables.find((t: any) => t.id === body.tableId) || store.tables[0];
+      if (table) {
+        table.status = 'OCCUPIED';
+      }
+
+      const orderCount = store.orders.length + 1;
+      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const orderNumber = `ORD-${dateStr}-${orderCount.toString().padStart(3, '0')}`;
+      const orderId = `ord-qr-${Date.now()}`;
+
+      let subtotal = 0;
+      const orderItems = (body.items || []).map((it: any, idx: number) => {
+        const itemObj = store.items.find((m: any) => m.id === it.menuItemId);
+        const itemSubtotal = it.quantity * it.unitPrice;
+        subtotal += itemSubtotal;
+        return {
+          id: `oit-${orderId}-${idx + 1}`,
+          order_id: orderId,
+          menu_item_id: it.menuItemId,
+          item_name: itemObj?.name || 'Cafe Item',
+          variant_name: it.variantName || 'Single',
+          quantity: it.quantity,
+          unit_price: it.unitPrice.toFixed(2),
+          subtotal: itemSubtotal.toFixed(2),
+          notes: it.notes || '',
+          item_status: 'COOKING',
+          is_veg: itemObj?.is_veg ?? true,
+          prep_time_minutes: itemObj?.prep_time_minutes ?? 6,
+        };
+      });
+
+      const discountAmount = body.appliedDiscountPercent ? (subtotal * (body.appliedDiscountPercent / 100)) : 0;
+      const taxableAmount = Math.max(0, subtotal - discountAmount);
+      const taxAmount = taxableAmount * 0.05;
+      const totalAmount = (taxableAmount + taxAmount).toFixed(2);
+
+      const newOrder = {
+        id: orderId,
+        order_number: orderNumber,
+        order_type: 'QR_CUSTOMER',
+        table_id: table.id,
+        table_number: table.table_number,
+        table_section: table.section,
+        customer_name: body.customerName,
+        customer_phone: body.customerPhone,
+        status: 'SENT_TO_KITCHEN',
+        order_notes: body.notes || `Table QR Self-Order from ${table.table_number}${body.appliedVoucher ? ` (${body.appliedVoucher})` : ''}`,
+        created_at: new Date().toISOString(),
+        elapsed_minutes: 0,
+        subtotal: subtotal.toFixed(2),
+        discount_amount: discountAmount.toFixed(2),
+        tax_amount: taxAmount.toFixed(2),
+        total_amount: totalAmount,
+        items: orderItems,
+      };
+
+      store.orders.unshift(newOrder);
+
+      // Update customer loyalty
+      if (!store.customers) store.customers = [];
+      const cleanPhone = (body.customerPhone || '').replace(/[^0-9]/g, '').slice(-10);
+      let customer = store.customers.find((c: any) => c.phone === cleanPhone);
+      const earnedPoints = Math.max(10, Math.floor(Number(totalAmount) / 10));
+
+      if (customer) {
+        customer.total_orders += 1;
+        customer.current_streak += 1;
+        customer.craving_points += earnedPoints;
+        if (Number(totalAmount) >= 300) {
+          customer.streak_unlocked_at = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString();
+        }
+      }
+
+      saveStore(store);
+
+      return makeRes({
+        success: true,
+        message: `Table order received for ${table.table_number}`,
+        data: {
+          orderId,
+          orderNumber,
+          tableNumber: table.table_number,
+          section: table.section,
+          totalAmount,
+          earnedPoints,
+          status: 'SENT_TO_KITCHEN',
+        },
+      }, 201);
+    }
+
     // Default fallback
     return makeRes({ success: true, data: [] });
   };
