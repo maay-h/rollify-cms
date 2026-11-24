@@ -184,6 +184,12 @@ export const BillingCheckoutPage: React.FC = () => {
     };
   }, [socket]);
 
+  const filteredBills = bills.filter((b) => {
+    if (statusFilter !== 'ALL' && b.payment_status !== statusFilter) return false;
+    if (search && !b.bill_number.toLowerCase().includes(search.toLowerCase()) && !b.order_number.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
   // Generate Bill from Served Order
   const handleGenerateBill = async (order: OrderToBill) => {
     try {
@@ -475,13 +481,16 @@ export const BillingCheckoutPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
-                  {bills
-                    .filter((b) => {
-                      if (statusFilter !== 'ALL' && b.payment_status !== statusFilter) return false;
-                      if (search && !b.bill_number.toLowerCase().includes(search.toLowerCase()) && !b.order_number.toLowerCase().includes(search.toLowerCase())) return false;
-                      return true;
-                    })
-                    .map((bill) => (
+                  {filteredBills.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="py-12 text-center text-stone-400">
+                        <Receipt className="w-8 h-8 mx-auto mb-2 text-stone-300" />
+                        <p className="text-sm font-semibold text-stone-600">No Invoices Found</p>
+                        <p className="text-xs text-stone-400 mt-0.5">Invoices generated for completed or ongoing orders will be listed here.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredBills.map((bill) => (
                       <tr key={bill.id} className="hover:bg-stone-50/60">
                         <td className="py-3 px-4 font-mono font-bold text-stone-900">
                           {bill.bill_number}
@@ -550,7 +559,8 @@ export const BillingCheckoutPage: React.FC = () => {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

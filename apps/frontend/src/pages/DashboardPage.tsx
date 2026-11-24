@@ -54,7 +54,7 @@ export const DashboardPage: React.FC = () => {
     totalTables: 10,
     occupiedTables: 0,
     lowStockCount: 0,
-    totalMenuItems: 101,
+    totalMenuItems: 114,
     orderCounts: {
       created: 0,
       toKitchen: 0,
@@ -80,7 +80,7 @@ export const DashboardPage: React.FC = () => {
 
         let totalTables = 10;
         let occupiedTables = 0;
-        let totalMenuItems = 101;
+        let totalMenuItems = 114;
         let activeKitchenTickets = 0;
         let lowStockCount = 0;
         let todaySales = 0;

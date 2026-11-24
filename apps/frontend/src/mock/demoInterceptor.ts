@@ -9,7 +9,16 @@ import {
   DEMO_INITIAL_ORDERS 
 } from './demoStore.js';
 
-const STORAGE_KEY = 'rollify_pos_cafe_db_v6';
+const STORAGE_KEY = 'rollify_pos_clean_production_v1';
+
+// Auto-purge legacy demo data caches from previous sessions
+try {
+  ['rollify_pos_demo_db_v1', 'rollify_pos_demo_db_v2', 'rollify_pos_demo_db_v3', 'rollify_pos_cafe_db_v6'].forEach((k) => {
+    localStorage.removeItem(k);
+  });
+} catch {
+  // safe ignore
+}
 
 function getStore() {
   const existing = localStorage.getItem(STORAGE_KEY);
@@ -36,50 +45,11 @@ function getStore() {
     categories: DEMO_CATEGORIES,
     items: DEMO_MENU_ITEMS,
     ingredients: DEMO_INGREDIENTS,
-    vendors: DEMO_VENDORS,
-    expenses: DEMO_EXPENSES,
-    orders: DEMO_INITIAL_ORDERS,
-    bills: [
-      {
-        id: 'bill-01',
-        bill_number: 'INV-20261122-001',
-        order_id: 'ord-01',
-        order_number: 'ROL-20261122-001',
-        order_type: 'DINE_IN',
-        table_number: 'T-01',
-        customer_name: 'Priya Sharma',
-        gross_amount: '398.00',
-        discount_amount: '0.00',
-        taxable_amount: '398.00',
-        tax_amount: '19.90',
-        net_amount: '417.90',
-        paid_amount: '0.00',
-        balance_due: 417.90,
-        payment_status: 'UNPAID',
-        cashier_name: 'Head Cashier',
-        created_at: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-        items: [
-          { id: 'bi-01', item_name: 'Rollify Signature Chicken Roll', variant_name: 'LRG', quantity: 2, unit_price: 169, subtotal: 338 },
-          { id: 'bi-02', item_name: 'Peri Peri Fries', variant_name: 'REG', quantity: 1, unit_price: 99, subtotal: 99 },
-        ],
-        payments: [],
-      },
-    ],
-    shifts: [
-      {
-        id: 'shf-01',
-        user_id: 'usr-admin-01',
-        full_name: 'System Admin',
-        username: 'admin',
-        role: 'ADMIN',
-        shift_date: new Date().toISOString().slice(0, 10),
-        clock_in: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
-        total_hours: 3.0,
-        hourly_rate: 180,
-        shift_wage: 540,
-        status: 'ACTIVE',
-      },
-    ],
+    vendors: [],
+    expenses: [],
+    orders: [],
+    bills: [],
+    shifts: [],
     dayClosings: [],
   };
 
@@ -430,9 +400,10 @@ export function initDemoInterceptor() {
       const tax = taxable * 0.05;
       const net = taxable;
 
+      const todayCode = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       const newBill = {
         id: `bill-${Date.now()}`,
-        bill_number: `INV-20261122-${(store.bills.length + 1).toString().padStart(3, '0')}`,
+        bill_number: `INV-${todayCode}-${(store.bills.length + 1).toString().padStart(3, '0')}`,
         order_id: orderId,
         order_number: order?.order_number || 'ROL-001',
         order_type: order?.order_type || 'DINE_IN',
@@ -524,24 +495,24 @@ export function initDemoInterceptor() {
     }
 
     if (path === '/api/billing/day-close/preview') {
-      const totalSettled = store.bills
-        .filter((b: any) => b.payment_status === 'PAID')
-        .reduce((acc: number, b: any) => acc + Number(b.net_amount), 0);
+      const paidBills = (store.bills || []).filter((b: any) => b.payment_status === 'PAID');
+      const totalSettled = paidBills.reduce((acc: number, b: any) => acc + Number(b.net_amount || 0), 0);
+      const totalGST = paidBills.reduce((acc: number, b: any) => acc + Number(b.tax_amount || 0), 0);
 
       return makeRes({
         success: true,
         data: {
           businessDate: new Date().toISOString().slice(0, 10),
-          totalBills: store.bills.length,
+          totalBills: paidBills.length,
           totalGross: totalSettled,
           totalDiscounts: 0,
-          totalGST: totalSettled * 0.05,
+          totalGST: totalGST,
           totalNet: totalSettled,
-          cashSales: totalSettled * 0.45,
-          upiSales: totalSettled * 0.40,
-          cardSales: totalSettled * 0.15,
+          cashSales: totalSettled,
+          upiSales: 0,
+          cardSales: 0,
           refunds: 0,
-          totalSettledSales: totalSettled || 2840.0,
+          totalSettledSales: totalSettled,
         },
       });
     }
@@ -570,16 +541,16 @@ export function initDemoInterceptor() {
 
     // 8. EXPENSES & VENDORS
     if (path === '/api/expenses' && method === 'GET') {
-      return makeRes({ success: true, data: store.expenses });
+      return makeRes({ success: true, data: store.expenses || [] });
     }
 
     if (path === '/api/expenses/vendors') {
-      return makeRes({ success: true, data: store.vendors });
+      return makeRes({ success: true, data: store.vendors || [] });
     }
 
     // 9. SHIFTS
     if (path === '/api/shifts' && method === 'GET') {
-      return makeRes({ success: true, data: store.shifts });
+      return makeRes({ success: true, data: store.shifts || [] });
     }
 
     if (path === '/api/shifts/payroll-summary') {
@@ -588,60 +559,107 @@ export function initDemoInterceptor() {
 
     // 10. ANALYTICS
     if (path === '/api/analytics/pnl') {
+      const paidBills = (store.bills || []).filter((b: any) => b.payment_status === 'PAID');
+      const grossRevenue = paidBills.reduce((acc: number, b: any) => acc + Number(b.gross_amount || 0), 0);
+      const discounts = paidBills.reduce((acc: number, b: any) => acc + Number(b.discount_amount || 0), 0);
+      const taxableSales = paidBills.reduce((acc: number, b: any) => acc + Number(b.taxable_amount || 0), 0);
+      const gstCollected = paidBills.reduce((acc: number, b: any) => acc + Number(b.tax_amount || 0), 0);
+      const totalCollected = paidBills.reduce((acc: number, b: any) => acc + Number(b.paid_amount || b.net_amount || 0), 0);
+      const invoiceCount = paidBills.length;
+
       return makeRes({
         success: true,
         data: {
           revenue: {
-            grossRevenue: 48500,
-            discounts: 1200,
-            taxableSales: 47300,
-            gstCollected: 2365,
-            totalCollected: 49665,
-            invoiceCount: 42,
+            grossRevenue,
+            discounts,
+            taxableSales,
+            gstCollected,
+            totalCollected,
+            invoiceCount,
           },
           costOfSales: {
-            cogs: 14200,
-            wastageCost: 450,
-            totalProductionCost: 14650,
+            cogs: Math.round(grossRevenue * 0.32 * 100) / 100,
+            wastageCost: 0,
+            totalProductionCost: Math.round(grossRevenue * 0.32 * 100) / 100,
           },
           grossProfit: {
-            amount: 32650,
-            marginPercent: 69.0,
+            amount: Math.round(grossRevenue * 0.68 * 100) / 100,
+            marginPercent: grossRevenue > 0 ? 68.0 : 0.0,
           },
           operatingExpenses: {
-            breakdown: { RENT: 45000, UTILITIES: 8500, PACKAGING: 6200 },
-            totalOperatingExpenses: 18500,
+            breakdown: {},
+            totalOperatingExpenses: 0,
           },
           netProfit: {
-            amount: 14150,
-            marginPercent: 29.9,
-            isProfitable: true,
+            amount: Math.round(grossRevenue * 0.68 * 100) / 100,
+            marginPercent: grossRevenue > 0 ? 68.0 : 0.0,
+            isProfitable: grossRevenue > 0,
           },
         },
       });
     }
 
     if (path === '/api/analytics/sales-breakdown') {
+      const paidBills = (store.bills || []).filter((b: any) => b.payment_status === 'PAID');
+      if (paidBills.length === 0) {
+        return makeRes({
+          success: true,
+          data: {
+            byOrderType: [],
+            byCategory: [],
+            topSellingDishes: [],
+            byPaymentMethod: [],
+          },
+        });
+      }
+
+      const byOrderTypeMap: Record<string, { count: number; total: number }> = {};
+      const byPaymentMap: Record<string, { count: number; total: number }> = {};
+      const itemMap: Record<string, { name: string; qty: number; total: number; is_veg: boolean; category: string }> = {};
+
+      paidBills.forEach((b: any) => {
+        const type = b.order_type || 'DINE_IN';
+        if (!byOrderTypeMap[type]) byOrderTypeMap[type] = { count: 0, total: 0 };
+        byOrderTypeMap[type].count += 1;
+        byOrderTypeMap[type].total += Number(b.net_amount || 0);
+
+        const method = b.payment_method || 'CASH';
+        if (!byPaymentMap[method]) byPaymentMap[method] = { count: 0, total: 0 };
+        byPaymentMap[method].count += 1;
+        byPaymentMap[method].total += Number(b.net_amount || 0);
+
+        (b.items || []).forEach((it: any) => {
+          if (!itemMap[it.item_name]) {
+            itemMap[it.item_name] = { name: it.item_name, qty: 0, total: 0, is_veg: true, category: 'Cafe Dishes' };
+          }
+          itemMap[it.item_name].qty += it.quantity || 1;
+          itemMap[it.item_name].total += Number(it.subtotal || 0);
+        });
+      });
+
       return makeRes({
         success: true,
         data: {
-          byOrderType: [
-            { order_type: 'DINE_IN', order_count: 28, total_sales: 32400 },
-            { order_type: 'TAKEAWAY', order_count: 14, total_sales: 16100 },
-          ],
-          byCategory: [
-            { category_id: 'cat-rolls-nv', category_name: 'Rolls – Non-Veg', units_sold: 45, total_revenue: 7600 },
-            { category_id: 'cat-starters-nv', category_name: 'Starters – Non-Veg', units_sold: 38, total_revenue: 5200 },
-          ],
-          topSellingDishes: [
-            { item_id: 'rnv-05', item_name: 'Rollify Signature Chicken Roll', category_name: 'Rolls – Non-Veg', is_veg: false, total_quantity_sold: 32, total_sales_volume: 5408 },
-            { item_id: 'bgr-01', item_name: 'Chicken Zinger Burger + Fries', category_name: 'Burgers', is_veg: false, total_quantity_sold: 21, total_sales_volume: 3969 },
-          ],
-          byPaymentMethod: [
-            { payment_method: 'UPI', transaction_count: 24, total_amount: 27500 },
-            { payment_method: 'CASH', transaction_count: 12, total_amount: 14200 },
-            { payment_method: 'CARD', transaction_count: 6, total_amount: 6800 },
-          ],
+          byOrderType: Object.entries(byOrderTypeMap).map(([order_type, val]) => ({
+            order_type,
+            order_count: val.count,
+            total_sales: val.total,
+          })),
+          byCategory: [],
+          topSellingDishes: Object.values(itemMap).map((it) => ({
+            item_id: it.name,
+            item_name: it.name,
+            category_name: it.category,
+            is_veg: it.is_veg,
+            total_quantity_sold: it.qty,
+            total_sales_volume: it.total,
+          })),
+          byPaymentMethod: Object.entries(byPaymentMap).map(([payment_method, val]) => ({
+            payment_method,
+            transaction_count: val.count,
+            total_amount: val.total,
+          })),
         },
       });
     }

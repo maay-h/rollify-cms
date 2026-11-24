@@ -19,10 +19,10 @@ export const DEMO_USERS: DemoUser[] = [
 ];
 
 export const DEMO_TABLES = [
-  { id: 'tbl-01', table_number: 'T-01', section: 'Main Indoor', capacity: 4, status: 'OCCUPIED', qr_token: 'QR_TBL_01_ROL' },
+  { id: 'tbl-01', table_number: 'T-01', section: 'Main Indoor', capacity: 4, status: 'AVAILABLE', qr_token: 'QR_TBL_01_ROL' },
   { id: 'tbl-02', table_number: 'T-02', section: 'Main Indoor', capacity: 2, status: 'AVAILABLE', qr_token: 'QR_TBL_02_ROL' },
   { id: 'tbl-03', table_number: 'T-03', section: 'Main Indoor', capacity: 6, status: 'AVAILABLE', qr_token: 'QR_TBL_03_ROL' },
-  { id: 'tbl-04', table_number: 'T-04', section: 'Main Indoor', capacity: 4, status: 'OCCUPIED', qr_token: 'QR_TBL_04_ROL' },
+  { id: 'tbl-04', table_number: 'T-04', section: 'Main Indoor', capacity: 4, status: 'AVAILABLE', qr_token: 'QR_TBL_04_ROL' },
   { id: 'tbl-05', table_number: 'T-05', section: 'Garden Patio', capacity: 4, status: 'AVAILABLE', qr_token: 'QR_TBL_05_ROL' },
   { id: 'tbl-06', table_number: 'T-06', section: 'Garden Patio', capacity: 4, status: 'AVAILABLE', qr_token: 'QR_TBL_06_ROL' },
   { id: 'tbl-07', table_number: 'T-07', section: 'Balcony View', capacity: 2, status: 'AVAILABLE', qr_token: 'QR_TBL_07_ROL' },
@@ -102,58 +102,8 @@ export const DEMO_INGREDIENTS = [
   { id: 'ing-ice-cream', name: 'Vanilla Ice Cream Base', unit: 'kg', current_stock: 18, min_threshold: 5, cost_per_unit: 180, stock_valuation: 3240, stock_status: 'OPTIMAL', is_active: true },
 ];
 
-export const DEMO_VENDORS = [
-  { id: 'ven-01', name: 'Fresh Poultry & Farm Wholesale', contact_person: 'Rajesh Verma', phone: '+91 98451 12233', email: 'poultry@freshfarm.in', address: 'APMC Market Yard, Bengaluru', current_liability: 12000, total_business_volume: 45000, total_invoices: 4 },
-  { id: 'ven-02', name: 'Dairy Pure & Malai Paneer Hub', contact_person: 'Amit Patel', phone: '+91 98452 23344', email: 'orders@dairypure.com', address: 'Dairy Circle, Bannerghatta Rd', current_liability: 0, total_business_volume: 28000, total_invoices: 3 },
-  { id: 'ven-03', name: 'Metro Eco Packaging & Paper', contact_person: 'Sunil Rao', phone: '+91 98453 34455', email: 'sales@metropack.co', address: 'Peenya Industrial Area', current_liability: 3500, total_business_volume: 16500, total_invoices: 2 },
-  { id: 'ven-04', name: 'Rollify Store Realty & Estates', contact_person: 'Anand Kumar', phone: '+91 98454 45566', email: 'lease@indiranagar.realty', address: '100ft Road, Indiranagar', current_liability: 0, total_business_volume: 90000, total_invoices: 2 },
-  { id: 'ven-05', name: 'Commercial Gas & Utility Corp', contact_person: 'Utility Desk', phone: '+91 98455 56677', email: 'gas@commercialenergy.in', address: 'Domlur Sub-Station', current_liability: 0, total_business_volume: 17000, total_invoices: 2 },
-];
+export const DEMO_VENDORS: any[] = [];
 
-export const DEMO_EXPENSES = [
-  { id: 'exp-01', vendor_id: 'ven-04', vendor_name: 'Rollify Store Realty & Estates', category: 'RENT' as const, amount: 45000, payment_status: 'PAID' as const, payment_method: 'BANK_TRANSFER' as const, description: 'Monthly store rent for Rollify flagship outlet', expense_date: '2026-11-01', created_by_name: 'System Admin' },
-  { id: 'exp-02', vendor_id: 'ven-05', vendor_name: 'Commercial Gas & Utility Corp', category: 'UTILITIES' as const, amount: 8500, payment_status: 'PAID' as const, payment_method: 'UPI' as const, description: 'Commercial LPG cylinders (x4) and utility bill', expense_date: '2026-11-05', created_by_name: 'Cafe Manager' },
-  { id: 'exp-03', vendor_id: 'ven-03', vendor_name: 'Metro Eco Packaging & Paper', category: 'PACKAGING' as const, amount: 6200, payment_status: 'PAID' as const, payment_method: 'UPI' as const, description: 'Branded butter paper, foil wraps, parcel containers', expense_date: '2026-11-10', created_by_name: 'Cafe Manager' },
-  { id: 'exp-04', vendor_id: 'ven-01', vendor_name: 'Fresh Poultry & Farm Wholesale', category: 'RAW_MATERIALS' as const, amount: 12000, payment_status: 'PENDING_LIABILITY' as const, description: 'Fresh chicken supply credit invoice #PV-8831', expense_date: '2026-11-18', created_by_name: 'System Admin' },
-];
+export const DEMO_EXPENSES: any[] = [];
 
-export const DEMO_INITIAL_ORDERS = [
-  {
-    id: 'ord-01',
-    order_number: 'ROL-20261122-001',
-    order_type: 'DINE_IN',
-    table_id: 'tbl-01',
-    table_number: 'T-01',
-    table_section: 'Main Indoor',
-    customer_name: 'Priya Sharma',
-    customer_phone: '+91 98450 11223',
-    status: 'PREPARING',
-    order_notes: 'Extra spicy chicken roll, mint dip on side',
-    created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
-    elapsed_minutes: 12,
-    total_amount: '417.90',
-    items: [
-      { id: 'oit-01', order_id: 'ord-01', menu_item_id: 'rnv-05', item_name: 'Rollify Signature Chicken Roll', variant_name: 'LRG', quantity: 2, unit_price: '169.00', subtotal: '338.00', item_status: 'PREPARING', is_veg: false, prep_time_minutes: 8 },
-      { id: 'oit-02', order_id: 'ord-01', menu_item_id: 'fry-02', item_name: 'Peri Peri Fries', variant_name: 'REG', quantity: 1, unit_price: '99.00', subtotal: '99.00', item_status: 'PREPARING', is_veg: true, prep_time_minutes: 5 },
-    ],
-  },
-  {
-    id: 'ord-02',
-    order_number: 'ROL-20261122-002',
-    order_type: 'DINE_IN',
-    table_id: 'tbl-04',
-    table_number: 'T-04',
-    table_section: 'Main Indoor',
-    customer_name: 'Amitabh Sen',
-    customer_phone: '+91 98450 99887',
-    status: 'READY',
-    order_notes: 'Served hot with fries',
-    created_at: new Date(Date.now() - 1000 * 60 * 6).toISOString(),
-    elapsed_minutes: 6,
-    total_amount: '354.90',
-    items: [
-      { id: 'oit-03', order_id: 'ord-02', menu_item_id: 'bgr-01', item_name: 'Chicken Zinger Burger + Fries', variant_name: 'Single', quantity: 1, unit_price: '189.00', subtotal: '189.00', item_status: 'READY', is_veg: false, prep_time_minutes: 7 },
-      { id: 'oit-04', order_id: 'ord-02', menu_item_id: 'moj-01', item_name: 'Virgin Mojito', variant_name: 'Single', quantity: 1, unit_price: '149.00', subtotal: '149.00', item_status: 'READY', is_veg: true, prep_time_minutes: 3 },
-    ],
-  },
-];
+export const DEMO_INITIAL_ORDERS: any[] = [];
