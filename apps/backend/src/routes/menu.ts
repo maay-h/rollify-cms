@@ -43,6 +43,7 @@ menuRouter.get('/items', authenticateToken, async (req: Request, res: Response, 
         m.is_available, 
         m.is_chef_special,
         m.is_spicy,
+        m.image_url,
         m.prep_time_minutes,
         m.display_order
       FROM menu_items m

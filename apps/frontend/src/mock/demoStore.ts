@@ -31,7 +31,7 @@ export const DEMO_TABLES = [
   { id: 'tbl-10', table_number: 'BAR-02', section: 'Quick Counter', capacity: 1, status: 'AVAILABLE', qr_token: 'QR_BAR_02_ROL' },
 ];
 
-function getProductImage(categoryId: string, name: string): string {
+export function getProductImage(categoryId: string, name: string): string {
   const n = name.toLowerCase();
   if (n.includes('espresso')) return 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=500&q=80';
   if (n.includes('cappuccino')) return 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=500&q=80';

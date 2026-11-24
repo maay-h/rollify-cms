@@ -27,7 +27,7 @@ import {
   Tag
 } from 'lucide-react';
 import { clsx } from 'clsx';
-import { DEMO_CATEGORIES, DEMO_MENU_ITEMS, DEMO_TABLES } from '../mock/demoStore.js';
+import { DEMO_CATEGORIES, DEMO_MENU_ITEMS, DEMO_TABLES, getProductImage } from '../mock/demoStore.js';
 
 interface MenuItemVariant {
   id: string;
@@ -431,7 +431,7 @@ export const POSOrderPage: React.FC = () => {
         </div>
 
         {/* Product Cards Grid with Food Images */}
-        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3.5 min-h-0">
+        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3.5 min-h-0 grid-auto-rows-[minmax(230px,auto)]">
           {filteredItems.length === 0 ? (
             <div className="col-span-full py-16 flex flex-col items-center justify-center text-center">
               <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mb-3">
@@ -459,12 +459,16 @@ export const POSOrderPage: React.FC = () => {
               {/* Product Photo Canvas */}
               <div className="relative w-full h-32 min-h-[128px] bg-stone-100 overflow-hidden shrink-0">
                 <img
-                  src={item.image_url || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&q=80'}
+                  src={item.image_url || getProductImage(item.category_id, item.name)}
                   alt={item.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&q=80';
+                    const fallback = getProductImage(item.category_id, item.name);
+                    const current = (e.currentTarget as HTMLImageElement).src;
+                    if (current !== fallback) {
+                      (e.currentTarget as HTMLImageElement).src = fallback;
+                    }
                   }}
                 />
                 {/* Veg/Non-Veg Tag */}
