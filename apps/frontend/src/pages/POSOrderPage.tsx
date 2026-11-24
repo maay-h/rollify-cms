@@ -368,9 +368,9 @@ export const POSOrderPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col xl:flex-row gap-6 max-w-[1700px] mx-auto min-h-[calc(100vh-100px)] xl:h-[calc(100vh-100px)]">
+    <div className="flex flex-col lg:flex-row gap-5 max-w-[1750px] mx-auto min-h-[calc(100vh-100px)] lg:h-[calc(100vh-100px)]">
       {/* LEFT: Menu Browsing & Item Selection (70% width) */}
-      <div className="flex-1 flex flex-col bg-white rounded-3xl border border-stone-200/80 p-5 shadow-xs min-h-[550px] xl:min-h-0">
+      <div className="flex-1 flex flex-col bg-white rounded-3xl border border-stone-200/80 p-4 sm:p-5 shadow-xs min-w-0 overflow-hidden min-h-[550px] lg:min-h-0">
         {/* Top Controls: Search + Veg Filter */}
         <div className="flex items-center gap-3 mb-4">
           <div className="relative flex-1">
@@ -431,7 +431,7 @@ export const POSOrderPage: React.FC = () => {
         </div>
 
         {/* Product Cards Grid with Food Images */}
-        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 min-h-0">
+        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3.5 min-h-0">
           {filteredItems.length === 0 ? (
             <div className="col-span-full py-16 flex flex-col items-center justify-center text-center">
               <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mb-3">
@@ -454,18 +454,21 @@ export const POSOrderPage: React.FC = () => {
             <div
               key={item.id}
               onClick={() => handleItemClick(item)}
-              className="rounded-2xl border border-stone-200 hover:border-[#EA580C] hover:shadow-md transition cursor-pointer bg-white flex flex-col justify-between active:scale-[0.98] select-none group overflow-hidden"
+              className="rounded-2xl border border-stone-200/90 hover:border-[#EA580C] hover:shadow-md transition cursor-pointer bg-white flex flex-col justify-between active:scale-[0.98] select-none group overflow-hidden min-h-[220px]"
             >
               {/* Product Photo Canvas */}
-              <div className="relative w-full h-32 bg-stone-100 overflow-hidden">
+              <div className="relative w-full h-32 min-h-[128px] bg-stone-100 overflow-hidden shrink-0">
                 <img
                   src={item.image_url || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&q=80'}
                   alt={item.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&q=80';
+                  }}
                 />
                 {/* Veg/Non-Veg Tag */}
-                <div className="absolute top-2 left-2">
+                <div className="absolute top-2 left-2 z-10">
                   <span
                     className={clsx(
                       'w-4 h-4 rounded-xs border-2 bg-white/95 backdrop-blur-xs flex items-center justify-center shadow-xs',
@@ -479,7 +482,7 @@ export const POSOrderPage: React.FC = () => {
                 </div>
 
                 {/* Chef Special / Spicy Badges */}
-                <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                <div className="absolute top-2 right-2 flex flex-col gap-1 items-end z-10">
                   {item.is_chef_special && (
                     <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-[#EA580C] text-white shadow-xs">
                       ★ Special
@@ -494,7 +497,7 @@ export const POSOrderPage: React.FC = () => {
               </div>
 
               {/* Product Info */}
-              <div className="p-3 flex-1 flex flex-col justify-between">
+              <div className="p-3 flex-1 flex flex-col justify-between min-h-[85px]">
                 <div>
                   <h4 className="text-xs font-bold text-[#2D1810] leading-snug line-clamp-1 group-hover:text-[#EA580C] transition-colors">
                     {item.name}
@@ -504,7 +507,7 @@ export const POSOrderPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="mt-2 pt-2 border-t border-stone-100 flex items-center justify-between">
+                <div className="mt-2 pt-2 border-t border-stone-100 flex items-center justify-between shrink-0">
                   <span className="text-xs font-mono font-black text-[#2D1810]">
                     {item.variants && item.variants.length > 1 ? (
                       `₹${item.variants[0].price}+`
@@ -525,7 +528,7 @@ export const POSOrderPage: React.FC = () => {
       </div>
 
       {/* RIGHT: Active Order Cart & Fast Checkout (30% width) */}
-      <div className="w-full xl:w-96 flex flex-col bg-white rounded-3xl border border-stone-200/80 p-5 shadow-xs">
+      <div id="pos-cart-panel" className="w-full lg:w-[380px] xl:w-[420px] shrink-0 flex flex-col bg-white rounded-3xl border border-stone-200/80 p-4 sm:p-5 shadow-xs overflow-hidden">
         {/* Order Mode Selector */}
         <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#FAF7F2] border border-stone-200/60 rounded-2xl mb-3">
           <button
@@ -741,6 +744,31 @@ export const POSOrderPage: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Mobile / Tablet Floating Cart Bar (lg:hidden) */}
+      {cart.length > 0 && (
+        <div className="lg:hidden fixed bottom-4 left-4 right-4 z-40 bg-[#2D1810] text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between border border-amber-900/40">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[#EA580C] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+              {cart.reduce((a, c) => a + c.quantity, 0)}
+            </div>
+            <div>
+              <p className="text-xs font-bold leading-tight">Order Cart Active</p>
+              <p className="text-[10px] text-stone-300 font-mono">Total: ₹{grandTotal.toFixed(2)}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const el = document.getElementById('pos-cart-panel');
+              el?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="px-4 py-2 bg-white text-[#2D1810] text-xs font-bold rounded-xl hover:bg-stone-100 transition shadow-xs"
+          >
+            Review & Send ↓
+          </button>
+        </div>
+      )}
 
       {/* Size Variant Modal */}
       {variantModalItem && (

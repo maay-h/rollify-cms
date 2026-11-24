@@ -261,7 +261,7 @@ export const MenuPage: React.FC = () => {
           </div>
         ) : (
           filteredItems.map((item) => (
-          <Card key={item.id} className="p-5 flex flex-col justify-between hover:shadow-md transition">
+          <Card key={item.id} className="p-5 flex flex-col justify-between hover:shadow-md transition min-h-[160px]">
             <div>
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
