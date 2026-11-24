@@ -59,6 +59,12 @@ function getStore() {
 
 function saveStore(store: any) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  try {
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('rollify:new_order'));
+  } catch {
+    // safe ignore
+  }
 }
 
 export function initDemoInterceptor() {

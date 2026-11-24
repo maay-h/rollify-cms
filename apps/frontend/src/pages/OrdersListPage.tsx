@@ -107,6 +107,17 @@ export const OrdersListPage: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
+    const interval = setInterval(fetchOrders, 5000);
+
+    const handleStorageOrCustom = () => fetchOrders();
+    window.addEventListener('storage', handleStorageOrCustom);
+    window.addEventListener('rollify:new_order', handleStorageOrCustom);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageOrCustom);
+      window.removeEventListener('rollify:new_order', handleStorageOrCustom);
+    };
   }, [token]);
 
   // Real-Time Socket.io Listeners for Instant Synchronization!

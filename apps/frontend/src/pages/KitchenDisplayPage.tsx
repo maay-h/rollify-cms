@@ -109,10 +109,25 @@ export const KitchenDisplayPage: React.FC = () => {
 
   useEffect(() => {
     fetchTickets();
-    // Refresh tickets every 30s to update elapsed minutes
-    const interval = setInterval(fetchTickets, 30000);
-    return () => clearInterval(interval);
-  }, [token]);
+    // Refresh tickets every 5s to ensure instant updates from customer QR orders
+    const interval = setInterval(fetchTickets, 5000);
+
+    const handleStorageOrCustomEvent = () => {
+      fetchTickets();
+      if (soundEnabled) {
+        playKitchenChime();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageOrCustomEvent);
+    window.addEventListener('rollify:new_order', handleStorageOrCustomEvent);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageOrCustomEvent);
+      window.removeEventListener('rollify:new_order', handleStorageOrCustomEvent);
+    };
+  }, [token, soundEnabled]);
 
   // Real-Time Socket Listeners for KDS
   useEffect(() => {

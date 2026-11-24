@@ -159,6 +159,21 @@ export const BillingCheckoutPage: React.FC = () => {
 
   useEffect(() => {
     fetchBillingData();
+    // Fast 5s auto-refresh for instant live synchronization with table QR orders
+    const interval = setInterval(fetchBillingData, 5000);
+
+    const handleStorageOrCustomEvent = () => {
+      fetchBillingData();
+    };
+
+    window.addEventListener('storage', handleStorageOrCustomEvent);
+    window.addEventListener('rollify:new_order', handleStorageOrCustomEvent);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageOrCustomEvent);
+      window.removeEventListener('rollify:new_order', handleStorageOrCustomEvent);
+    };
   }, [token]);
 
   // Real-Time Socket Listeners for Payments and New Bills

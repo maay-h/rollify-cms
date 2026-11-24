@@ -513,6 +513,7 @@ customerQrRouter.post('/table-order', async (req: Request, res: Response, next: 
       };
 
       io.emit('order:new', socketPayload);
+      io.emit('order:kitchen_ticket', socketPayload);
       io.emit('kds:new_order', socketPayload);
       io.emit('table:status', { tableId: table.id, status: 'OCCUPIED' });
     }
