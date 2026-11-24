@@ -9,14 +9,20 @@ import {
   DEMO_INITIAL_ORDERS 
 } from './demoStore.js';
 
-const STORAGE_KEY = 'rollify_pos_demo_db_v3';
+const STORAGE_KEY = 'rollify_pos_cafe_db_v6';
 
 function getStore() {
   const existing = localStorage.getItem(STORAGE_KEY);
   if (existing) {
     try {
       const parsed = JSON.parse(existing);
-      if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+      if (
+        parsed && 
+        Array.isArray(parsed.items) && 
+        parsed.items.length >= 50 &&
+        Array.isArray(parsed.categories) && 
+        parsed.categories.length >= 10
+      ) {
         return parsed;
       }
     } catch {
@@ -242,11 +248,13 @@ export function initDemoInterceptor() {
 
     // 4. MENU
     if (path === '/api/menu/categories') {
-      return makeRes({ success: true, data: store.categories });
+      const cats = store.categories && store.categories.length > 0 ? store.categories : DEMO_CATEGORIES;
+      return makeRes({ success: true, data: cats });
     }
 
     if (path === '/api/menu/items' && method === 'GET') {
-      return makeRes({ success: true, data: store.items });
+      const items = store.items && store.items.length > 0 ? store.items : DEMO_MENU_ITEMS;
+      return makeRes({ success: true, data: items });
     }
 
     if (path.startsWith('/api/menu/items/') && path.endsWith('/availability') && method === 'PATCH') {

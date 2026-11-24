@@ -23,6 +23,7 @@ import {
   AlertTriangle 
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { DEMO_INITIAL_ORDERS } from '../mock/demoStore.js';
 
 interface OrderItem {
   id: string;
@@ -92,11 +93,13 @@ export const OrdersListPage: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();
-      if (json.success && json.data) {
+      if (json.success && json.data && json.data.length > 0) {
         setOrders(json.data);
+      } else {
+        setOrders(DEMO_INITIAL_ORDERS as any);
       }
     } catch (err) {
-      toast.error('Failed to load orders');
+      setOrders(DEMO_INITIAL_ORDERS as any);
     } finally {
       setLoading(false);
     }

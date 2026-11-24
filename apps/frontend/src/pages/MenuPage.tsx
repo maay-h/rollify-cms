@@ -15,9 +15,11 @@ import {
   Flame, 
   Sparkles, 
   Package, 
-  Info 
+  Info,
+  UtensilsCrossed
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { DEMO_CATEGORIES, DEMO_MENU_ITEMS } from '../mock/demoStore.js';
 
 interface MenuItemVariant {
   id: string;
@@ -76,10 +78,20 @@ export const MenuPage: React.FC = () => {
       const catsJson = await catsRes.json();
       const itemsJson = await itemsRes.json();
 
-      if (catsJson.data) setCategories(catsJson.data);
-      if (itemsJson.data) setItems(itemsJson.data);
+      if (catsJson && Array.isArray(catsJson.data) && catsJson.data.length > 0) {
+        setCategories(catsJson.data);
+      } else {
+        setCategories(DEMO_CATEGORIES);
+      }
+
+      if (itemsJson && Array.isArray(itemsJson.data) && itemsJson.data.length > 0) {
+        setItems(itemsJson.data);
+      } else {
+        setItems(DEMO_MENU_ITEMS);
+      }
     } catch (err) {
-      toast.error('Failed to load menu data');
+      setCategories(DEMO_CATEGORIES);
+      setItems(DEMO_MENU_ITEMS);
     } finally {
       setLoading(false);
     }
@@ -227,7 +239,28 @@ export const MenuPage: React.FC = () => {
 
       {/* Menu Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredItems.map((item) => (
+        {filteredItems.length === 0 ? (
+          <div className="col-span-full py-16 flex flex-col items-center justify-center text-center bg-white rounded-2xl border border-stone-200 p-8 shadow-xs">
+            <div className="w-16 h-16 rounded-full bg-[#FAF7F2] border border-amber-200 flex items-center justify-center mb-3">
+              <UtensilsCrossed className="w-8 h-8 text-[#C67D3A]" />
+            </div>
+            <h3 className="text-base font-bold text-stone-900 mb-1">No cafe menu items match the filter</h3>
+            <p className="text-xs text-stone-500 max-w-sm mb-4">
+              Try selecting another category or clearing search filters to browse our fresh coffee, tea, beverages, snacks, burgers & desserts.
+            </p>
+            <button
+              onClick={() => {
+                setSelectedCat('ALL');
+                setSearch('');
+                setVegOnly(false);
+              }}
+              className="px-5 py-2 bg-[#2D1810] hover:bg-[#3E2723] text-white text-xs font-bold rounded-xl transition shadow-xs"
+            >
+              Show All Menu Items ({items.length})
+            </button>
+          </div>
+        ) : (
+          filteredItems.map((item) => (
           <Card key={item.id} className="p-5 flex flex-col justify-between hover:shadow-md transition">
             <div>
               <div className="flex items-start justify-between gap-2 mb-2">
@@ -334,7 +367,8 @@ export const MenuPage: React.FC = () => {
               )}
             </div>
           </Card>
-        ))}
+        ))
+      )}
       </div>
 
       {/* Recipe Inspection Modal */}

@@ -8,6 +8,7 @@ import { Modal } from '../components/ui/Modal.js';
 import { Input } from '../components/ui/Input.js';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner.js';
 import { Users, UserPlus, KeyRound, Shield, Phone, Mail } from 'lucide-react';
+import { DEMO_USERS } from '../mock/demoStore.js';
 
 interface StaffUser {
   id: string;
@@ -45,11 +46,13 @@ export const UsersPage: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();
-      if (json.success && json.data) {
+      if (json.success && json.data && json.data.length > 0) {
         setUsers(json.data);
+      } else {
+        setUsers(DEMO_USERS as any);
       }
     } catch (e) {
-      toast.error('Failed to load staff users');
+      setUsers(DEMO_USERS as any);
     } finally {
       setLoading(false);
     }

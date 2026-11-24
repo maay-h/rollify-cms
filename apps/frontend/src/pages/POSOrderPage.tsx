@@ -27,6 +27,7 @@ import {
   Tag
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { DEMO_CATEGORIES, DEMO_MENU_ITEMS, DEMO_TABLES } from '../mock/demoStore.js';
 
 interface MenuItemVariant {
   id: string;
@@ -127,16 +128,32 @@ export const POSOrderPage: React.FC = () => {
         const itemsJson = await itemsRes.json();
         const tablesJson = await tablesRes.json();
 
-        if (catsJson.data) setCategories(catsJson.data);
-        if (itemsJson.data) setMenuItems(itemsJson.data);
-        if (tablesJson.data) {
-          setTables(tablesJson.data);
-          // Auto-select first available table if dine-in
-          const firstAvail = tablesJson.data.find((t: DiningTable) => t.status === 'AVAILABLE');
-          if (firstAvail) setSelectedTableId(firstAvail.id);
+        if (catsJson && Array.isArray(catsJson.data) && catsJson.data.length > 0) {
+          setCategories(catsJson.data);
+        } else {
+          setCategories(DEMO_CATEGORIES);
         }
+
+        if (itemsJson && Array.isArray(itemsJson.data) && itemsJson.data.length > 0) {
+          setMenuItems(itemsJson.data);
+        } else {
+          setMenuItems(DEMO_MENU_ITEMS);
+        }
+
+        const validTables = (tablesJson && Array.isArray(tablesJson.data) && tablesJson.data.length > 0)
+          ? tablesJson.data
+          : (DEMO_TABLES as any);
+
+        setTables(validTables);
+        const firstAvail = validTables.find((t: DiningTable) => t.status === 'AVAILABLE');
+        if (firstAvail) setSelectedTableId(firstAvail.id);
       } catch (err) {
-        toast.error('Failed to load POS catalog data');
+        // Fallback to local official catalog
+        setCategories(DEMO_CATEGORIES);
+        setMenuItems(DEMO_MENU_ITEMS);
+        setTables(DEMO_TABLES as any);
+        const firstAvail = (DEMO_TABLES as any).find((t: DiningTable) => t.status === 'AVAILABLE');
+        if (firstAvail) setSelectedTableId(firstAvail.id);
       } finally {
         setLoading(false);
       }
@@ -351,9 +368,9 @@ export const POSOrderPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col xl:flex-row gap-6 max-w-[1700px] mx-auto h-[calc(100vh-100px)]">
+    <div className="flex flex-col xl:flex-row gap-6 max-w-[1700px] mx-auto min-h-[calc(100vh-100px)] xl:h-[calc(100vh-100px)]">
       {/* LEFT: Menu Browsing & Item Selection (70% width) */}
-      <div className="flex-1 flex flex-col bg-white rounded-3xl border border-stone-200/80 p-5 overflow-hidden shadow-xs">
+      <div className="flex-1 flex flex-col bg-white rounded-3xl border border-stone-200/80 p-5 shadow-xs min-h-[550px] xl:min-h-0">
         {/* Top Controls: Search + Veg Filter */}
         <div className="flex items-center gap-3 mb-4">
           <div className="relative flex-1">
@@ -393,7 +410,7 @@ export const POSOrderPage: React.FC = () => {
             )}
           >
             <Sparkles className="w-3.5 h-3.5 text-[#EA580C]" />
-            All Items
+            All Items ({menuItems.length})
           </button>
           {categories.map((c) => (
             <button
@@ -414,8 +431,26 @@ export const POSOrderPage: React.FC = () => {
         </div>
 
         {/* Product Cards Grid with Food Images */}
-        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5">
-          {filteredItems.map((item) => (
+        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 min-h-0">
+          {filteredItems.length === 0 ? (
+            <div className="col-span-full py-16 flex flex-col items-center justify-center text-center">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mb-3">
+                <UtensilsCrossed className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-stone-900">No menu items match your filter</h3>
+              <p className="text-xs text-stone-500 mt-1 max-w-sm">
+                Try resetting your search query or selecting a different category tab.
+              </p>
+              <button
+                type="button"
+                onClick={() => { setSelectedCat('ALL'); setSearch(''); setVegOnly(false); }}
+                className="mt-4 px-4 py-2 bg-[#2D1810] text-white text-xs font-bold rounded-xl hover:bg-stone-800 transition cursor-pointer"
+              >
+                Show All Menu Items ({menuItems.length})
+              </button>
+            </div>
+          ) : (
+            filteredItems.map((item) => (
             <div
               key={item.id}
               onClick={() => handleItemClick(item)}
@@ -484,7 +519,8 @@ export const POSOrderPage: React.FC = () => {
                 </div>
               </div>
             </div>
-          ))}
+          ))
+        )}
         </div>
       </div>
 

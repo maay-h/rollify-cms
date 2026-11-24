@@ -78,6 +78,7 @@ export const Sidebar: React.FC = () => {
   const visibleItems = navItems.filter((item) => {
     return item.roles.includes(userRole);
   });
+  const itemsToRender = visibleItems.length > 0 ? visibleItems : navItems;
 
   return (
     <aside className="w-64 shrink-0 bg-white border-r border-stone-200/80 flex flex-col justify-between hidden md:flex h-[calc(100vh-57px)]">
@@ -86,7 +87,7 @@ export const Sidebar: React.FC = () => {
           Core Operations
         </p>
 
-        {visibleItems.map((item) => (
+        {itemsToRender.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

@@ -1,21 +1,57 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Wifi, WifiOff, LogOut, KeyRound, Shield, Clock } from 'lucide-react';
+import { useNavigate, NavLink } from 'react-router-dom';
+import { 
+  Wifi, 
+  WifiOff, 
+  LogOut, 
+  KeyRound, 
+  Shield, 
+  Clock, 
+  Menu, 
+  X,
+  LayoutDashboard, 
+  ShoppingCart, 
+  ChefHat, 
+  Receipt, 
+  ListOrdered, 
+  UtensilsCrossed, 
+  BookOpen, 
+  Users, 
+  BarChart3 
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { useSocket } from '../../context/SocketContext.js';
 import { RollifyLogo } from '../common/RollifyLogo.js';
 import { Button } from '../ui/Button.js';
 import { Modal } from '../ui/Modal.js';
 import { Badge } from '../ui/Badge.js';
+import { clsx } from 'clsx';
 
 export const Navbar: React.FC = () => {
   const { user, logout, pinLogin } = useAuth();
   const { status, latency, reconnect } = useSocket();
   const navigate = useNavigate();
   const [isSwitchOpen, setIsSwitchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pin, setPin] = useState('');
   const [switchError, setSwitchError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const navItems = [
+    { to: '/dashboard', label: 'Operations Dashboard', icon: <LayoutDashboard className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'WAITER', 'KITCHEN'] },
+    { to: '/pos', label: 'Order Entry (POS)', icon: <ShoppingCart className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'WAITER'] },
+    { to: '/kitchen', label: 'Kitchen Display (KDS)', icon: <ChefHat className="w-4 h-4" />, roles: ['ADMIN', 'KITCHEN'] },
+    { to: '/billing', label: 'Cashier Dashboard', icon: <Receipt className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER'] },
+    { to: '/orders', label: 'Order Management', icon: <ListOrdered className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'WAITER', 'KITCHEN'] },
+    { to: '/tables', label: 'Table Management', icon: <UtensilsCrossed className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'WAITER'] },
+    { to: '/menu', label: 'Menu Management', icon: <BookOpen className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'WAITER', 'KITCHEN'] },
+    { to: '/users', label: 'Staff Management', icon: <Users className="w-4 h-4" />, roles: ['ADMIN'] },
+    { to: '/analytics', label: 'Revenue & Reports', icon: <BarChart3 className="w-4 h-4" />, roles: ['ADMIN'] },
+  ];
+
+  const userRole = (user?.role as any) || 'ADMIN';
+  const visibleNavItems = navItems.filter((i) => i.roles.includes(userRole));
+  const mobileNavToRender = visibleNavItems.length > 0 ? visibleNavItems : navItems;
 
   const handleQuickSwitch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,8 +95,17 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200/80 px-4 sm:px-6 py-2.5">
       <div className="flex items-center justify-between">
-        {/* Brand */}
-        <div className="flex items-center gap-6">
+        {/* Brand & Mobile Hamburger */}
+        <div className="flex items-center gap-2 sm:gap-6">
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-1.5 text-stone-700 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition border border-stone-200"
+            aria-label="Toggle Navigation Menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5 text-stone-800" /> : <Menu className="w-5 h-5 text-stone-800" />}
+          </button>
+          
           <RollifyLogo size="sm" showTagline={false} />
           
           <div className="hidden md:flex items-center gap-2">
@@ -138,6 +183,35 @@ export const Navbar: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Mobile Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div className="md:hidden mt-2 pt-2 border-t border-stone-200 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl p-3 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+          <p className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">
+            Switch Panel / Navigation
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+            {mobileNavToRender.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={() => setMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  clsx(
+                    'flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition',
+                    isActive
+                      ? 'bg-[#2D1810] text-white shadow-xs'
+                      : 'text-stone-700 hover:bg-stone-100'
+                  )
+                }
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Quick Switch PIN Modal */}
       <Modal isOpen={isSwitchOpen} onClose={() => setIsSwitchOpen(false)} maxWidth="sm" title="Quick Switch Terminal User">

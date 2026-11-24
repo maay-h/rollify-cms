@@ -143,10 +143,10 @@ export const BillingCheckoutPage: React.FC = () => {
       const billsJson = await billsRes.json();
       const ordersJson = await ordersRes.json();
 
-      if (billsJson.data) setBills(billsJson.data);
-      if (ordersJson.data) {
+      if (Array.isArray(billsJson.data)) setBills(billsJson.data);
+      if (Array.isArray(ordersJson.data)) {
         // Find orders that don't have a generated bill yet or are served
-        const billedOrderIds = new Set(billsJson.data.map((b: BillListItem) => b.order_id));
+        const billedOrderIds = new Set((billsJson.data || []).map((b: BillListItem) => b.order_id));
         const unbilled = ordersJson.data.filter((o: any) => !billedOrderIds.has(o.id));
         setUnbilledOrders(unbilled);
       }

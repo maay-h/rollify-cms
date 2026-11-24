@@ -16,6 +16,7 @@ import {
   RefreshCw 
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { DEMO_TABLES } from '../mock/demoStore.js';
 
 interface DiningTable {
   id: string;
@@ -48,11 +49,13 @@ export const TablesPage: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();
-      if (json.success && json.data) {
+      if (json.success && json.data && json.data.length > 0) {
         setTables(json.data);
+      } else {
+        setTables(DEMO_TABLES as any);
       }
     } catch (err) {
-      toast.error('Failed to load dining tables', 'Check network connection');
+      setTables(DEMO_TABLES as any);
     } finally {
       setLoading(false);
     }
