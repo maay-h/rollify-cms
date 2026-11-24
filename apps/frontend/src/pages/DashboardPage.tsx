@@ -201,7 +201,7 @@ export const DashboardPage: React.FC = () => {
               </>
             ) : (
               <>
-                {['ADMIN', 'MANAGER', 'KITCHEN'].includes(user?.role || '') && (
+                {['ADMIN', 'KITCHEN'].includes(user?.role || '') && (
                   <Button
                     variant="outline"
                     className="bg-white/10 border-white/30 text-white hover:bg-white/20"
@@ -210,7 +210,7 @@ export const DashboardPage: React.FC = () => {
                     Kitchen Display (KDS)
                   </Button>
                 )}
-                {['ADMIN', 'MANAGER', 'CASHIER'].includes(user?.role || '') && (
+                {['ADMIN', 'CASHIER'].includes(user?.role || '') && (
                   <Button
                     variant="outline"
                     className="bg-white/10 border-white/30 text-white hover:bg-white/20"
@@ -427,13 +427,13 @@ export const DashboardPage: React.FC = () => {
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   Menu catalog & price lookups
                 </li>
-                {['ADMIN', 'MANAGER', 'CASHIER'].includes(user?.role || '') && (
+                {['ADMIN', 'CASHIER'].includes(user?.role || '') && (
                   <li className="flex items-center gap-2 text-emerald-700 font-medium">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     Billing & split payment checkout
                   </li>
                 )}
-                {['ADMIN', 'MANAGER'].includes(user?.role || '') && (
+                {user?.role === 'ADMIN' && (
                   <li className="flex items-center gap-2 text-purple-700 font-medium">
                     <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
                     Menu catalog, table floor plan, staff & reports
@@ -463,7 +463,7 @@ export const DashboardPage: React.FC = () => {
               icon: <ShoppingCart className="w-4 h-4" />,
               color: 'bg-rollify-red-50 text-rollify-red group-hover:scale-110',
               borderColor: 'hover:border-rollify-red/50',
-              roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER'],
+              roles: ['ADMIN', 'CASHIER', 'WAITER'],
             },
             {
               to: '/kitchen',
@@ -472,7 +472,7 @@ export const DashboardPage: React.FC = () => {
               icon: <ChefHat className="w-4 h-4" />,
               color: 'bg-amber-50 text-amber-700 group-hover:scale-110',
               borderColor: 'hover:border-amber-300',
-              roles: ['ADMIN', 'MANAGER', 'KITCHEN'],
+              roles: ['ADMIN', 'KITCHEN'],
             },
             {
               to: '/billing',
@@ -481,7 +481,7 @@ export const DashboardPage: React.FC = () => {
               icon: <Receipt className="w-4 h-4" />,
               color: 'bg-emerald-50 text-emerald-700 group-hover:scale-110',
               borderColor: 'hover:border-emerald-300',
-              roles: ['ADMIN', 'MANAGER', 'CASHIER'],
+              roles: ['ADMIN', 'CASHIER'],
             },
             {
               to: '/orders',
@@ -490,7 +490,7 @@ export const DashboardPage: React.FC = () => {
               icon: <ListOrdered className="w-4 h-4" />,
               color: 'bg-blue-50 text-blue-700 group-hover:scale-110',
               borderColor: 'hover:border-blue-300',
-              roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER', 'KITCHEN'],
+              roles: ['ADMIN', 'CASHIER', 'WAITER', 'KITCHEN'],
             },
             {
               to: '/tables',
@@ -499,7 +499,7 @@ export const DashboardPage: React.FC = () => {
               icon: <UtensilsCrossed className="w-4 h-4" />,
               color: 'bg-stone-100 text-stone-700 group-hover:scale-110',
               borderColor: 'hover:border-stone-400',
-              roles: ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER'],
+              roles: ['ADMIN', 'CASHIER', 'WAITER'],
             },
             {
               to: '/menu',
@@ -508,16 +508,16 @@ export const DashboardPage: React.FC = () => {
               icon: <BookOpen className="w-4 h-4" />,
               color: 'bg-purple-50 text-purple-700 group-hover:scale-110',
               borderColor: 'hover:border-purple-300',
-              roles: ['ADMIN', 'MANAGER'],
+              roles: ['ADMIN'],
             },
             {
               to: '/users',
               title: 'Staff Management',
-              desc: 'Admin, Manager, Cashier, Waiter, Kitchen',
+              desc: 'Admin, Cashier, Waiter, Kitchen Staff',
               icon: <Users className="w-4 h-4" />,
               color: 'bg-indigo-50 text-indigo-700 group-hover:scale-110',
               borderColor: 'hover:border-indigo-300',
-              roles: ['ADMIN', 'MANAGER'],
+              roles: ['ADMIN'],
             },
             {
               to: '/analytics',
@@ -526,7 +526,7 @@ export const DashboardPage: React.FC = () => {
               icon: <BarChart3 className="w-4 h-4" />,
               color: 'bg-teal-50 text-teal-700 group-hover:scale-110',
               borderColor: 'hover:border-teal-300',
-              roles: ['ADMIN', 'MANAGER'],
+              roles: ['ADMIN'],
             },
           ]
             .filter((item) => item.roles.includes(user?.role || ''))

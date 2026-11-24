@@ -260,27 +260,19 @@ export const LoginPage: React.FC = () => {
             <p className="text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-2 text-center">
               Quick Staff Sign-In (PIN)
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
                 type="button"
                 onClick={() => handleQuickStaffLogin('ADMIN', '1111', 'admin')}
-                className="p-2 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-left transition"
+                className="p-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-left transition"
               >
                 <span className="block text-xs font-bold text-purple-900">Admin</span>
                 <span className="block text-[10px] text-purple-600 font-mono">PIN: 1111</span>
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickStaffLogin('MANAGER', '2222', 'manager')}
-                className="p-2 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-left transition"
-              >
-                <span className="block text-xs font-bold text-blue-900">Manager</span>
-                <span className="block text-[10px] text-blue-600 font-mono">PIN: 2222</span>
-              </button>
-              <button
-                type="button"
                 onClick={() => handleQuickStaffLogin('CASHIER', '3333', 'cashier')}
-                className="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-left transition"
+                className="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-left transition"
               >
                 <span className="block text-xs font-bold text-emerald-900">Cashier</span>
                 <span className="block text-[10px] text-emerald-600 font-mono">PIN: 3333</span>
@@ -288,7 +280,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleQuickStaffLogin('WAITER', '4444', 'waiter')}
-                className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-left transition"
+                className="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-left transition"
               >
                 <span className="block text-xs font-bold text-amber-900">Waiter</span>
                 <span className="block text-[10px] text-amber-600 font-mono">PIN: 4444</span>
@@ -296,7 +288,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleQuickStaffLogin('KITCHEN', '5555', 'kitchen')}
-                className="p-2 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-200 text-left transition col-span-2 sm:col-span-1"
+                className="p-2.5 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-200 text-left transition"
               >
                 <span className="block text-xs font-bold text-orange-900">Kitchen</span>
                 <span className="block text-[10px] text-orange-600 font-mono">PIN: 5555</span>

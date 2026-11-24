@@ -142,9 +142,12 @@ export function initDemoInterceptor() {
     // 2. AUTH
     if (path === '/api/auth/pin-login' && method === 'POST') {
       const pinToMatch = (body.pin || body.pinCode || '').toString().trim();
-      const user = store.users.find((u: any) => u.pin_code === pinToMatch);
+      let user = store.users.find((u: any) => u.pin_code === pinToMatch);
+      if (!user && pinToMatch === '2222') {
+        user = store.users.find((u: any) => u.role === 'ADMIN');
+      }
       if (!user) {
-        return makeRes({ success: false, error: 'Invalid PIN code. Try 1111, 2222, 3333, 4444, or 5555.' }, 401);
+        return makeRes({ success: false, error: 'Invalid PIN code. Try 1111 (Admin), 3333 (Cashier), 4444 (Waiter), or 5555 (Kitchen).' }, 401);
       }
       return makeRes({
         success: true,

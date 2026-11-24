@@ -237,8 +237,7 @@ export const UsersPage: React.FC = () => {
               <option value="WAITER">WAITER (Floor Ordering & Service)</option>
               <option value="CASHIER">CASHIER (POS Billing & Payments)</option>
               <option value="KITCHEN">KITCHEN (Kitchen Display System)</option>
-              <option value="MANAGER">MANAGER (Operations & Inventory)</option>
-              <option value="ADMIN">ADMIN (Full System Access)</option>
+              <option value="ADMIN">ADMIN (Full Cafe Management)</option>
             </select>
           </div>
           <Input

@@ -319,7 +319,7 @@ export const MenuPage: React.FC = () => {
                 Recipe Ingredients
               </Button>
 
-              {hasRole('ADMIN', 'MANAGER', 'KITCHEN') && (
+              {hasRole('ADMIN', 'KITCHEN') && (
                 <Button
                   variant={item.is_available ? 'outline' : 'gold'}
                   size="sm"

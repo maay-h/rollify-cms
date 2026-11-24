@@ -15,10 +15,9 @@ export async function seedDatabase() {
   const waiterHash = await bcrypt.hash('waiter123', 10);
   const kitchenHash = await bcrypt.hash('kitchen123', 10);
 
-  // 1. Staff Users & Roles
+  // 1. Staff Users & Roles (Admin, Cashier, Waiter, Kitchen)
   const users = [
     { id: 'usr-admin-01', username: 'admin', email: 'admin@rollify.com', pass: adminHash, role: 'ADMIN', pin: '1111', name: 'System Admin', phone: '+91 98455 71817' },
-    { id: 'usr-mgr-01', username: 'manager', email: 'manager@rollify.com', pass: managerHash, role: 'MANAGER', pin: '2222', name: 'Cafe Manager', phone: '+91 96116 39964' },
     { id: 'usr-cashier-01', username: 'cashier', email: 'cashier@rollify.com', pass: cashierHash, role: 'CASHIER', pin: '3333', name: 'Cafe Cashier', phone: '+91 96119 64366' },
     { id: 'usr-waiter-01', username: 'waiter', email: 'waiter@rollify.com', pass: waiterHash, role: 'WAITER', pin: '4444', name: 'Floor Waiter', phone: '+91 98765 43213' },
     { id: 'usr-kitchen-01', username: 'kitchen', email: 'kitchen@rollify.com', pass: kitchenHash, role: 'KITCHEN', pin: '5555', name: 'Kitchen Staff', phone: '+91 98765 43214' },
