@@ -16,7 +16,12 @@ import {
   Sparkles, 
   Package, 
   Info,
-  UtensilsCrossed
+  UtensilsCrossed,
+  Plus,
+  Pencil,
+  Trash2,
+  Check,
+  X
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { DEMO_CATEGORIES, DEMO_MENU_ITEMS } from '../mock/demoStore.js';
@@ -68,6 +73,192 @@ export const MenuPage: React.FC = () => {
   const [inspectItem, setInspectItem] = useState<MenuItem | null>(null);
   const [recipeIngredients, setRecipeIngredients] = useState<RecipeIngredient[]>([]);
   const [recipeLoading, setRecipeLoading] = useState(false);
+
+  // Alteration / Add Item Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Form Fields
+  const [formName, setFormName] = useState('');
+  const [formCategoryId, setFormCategoryId] = useState('');
+  const [formNewCategoryName, setFormNewCategoryName] = useState('');
+  const [isCreatingNewCat, setIsCreatingNewCat] = useState(false);
+  const [formPrice, setFormPrice] = useState<number | string>(120);
+  const [formDescription, setFormDescription] = useState('');
+  const [formIsVeg, setFormIsVeg] = useState(true);
+  const [formIsChefSpecial, setFormIsChefSpecial] = useState(false);
+  const [formIsSpicy, setFormIsSpicy] = useState(false);
+  const [formPrepTime, setFormPrepTime] = useState(10);
+  const [formIsAvailable, setFormIsAvailable] = useState(true);
+  const [formHasVariants, setFormHasVariants] = useState(false);
+  const [formVariants, setFormVariants] = useState<{ id?: string; variantName: string; price: number | string }[]>([
+    { variantName: 'Regular', price: 120 },
+    { variantName: 'Large', price: 160 },
+  ]);
+
+  const openCreateModal = () => {
+    setEditingItem(null);
+    setFormName('');
+    setFormCategoryId(categories[0]?.id || 'cat-rolls-01');
+    setFormNewCategoryName('');
+    setIsCreatingNewCat(false);
+    setFormPrice(120);
+    setFormDescription('');
+    setFormIsVeg(true);
+    setFormIsChefSpecial(false);
+    setFormIsSpicy(false);
+    setFormPrepTime(10);
+    setFormIsAvailable(true);
+    setFormHasVariants(false);
+    setFormVariants([
+      { variantName: 'Regular', price: 120 },
+      { variantName: 'Large', price: 160 },
+    ]);
+    setIsEditModalOpen(true);
+  };
+
+  const openEditModal = (item: MenuItem) => {
+    setEditingItem(item);
+    setFormName(item.name);
+    setFormCategoryId(item.category_id);
+    setFormNewCategoryName('');
+    setIsCreatingNewCat(false);
+    setFormPrice(Number(item.price) || 0);
+    setFormDescription(item.description || '');
+    setFormIsVeg(item.is_veg);
+    setFormIsChefSpecial(Boolean(item.is_chef_special));
+    setFormIsSpicy(Boolean(item.is_spicy));
+    setFormPrepTime(item.prep_time_minutes || 10);
+    setFormIsAvailable(item.is_available);
+
+    if (item.variants && item.variants.length > 0) {
+      setFormHasVariants(true);
+      setFormVariants(item.variants.map((v) => ({ id: v.id, variantName: v.variant_name, price: Number(v.price) })));
+    } else {
+      setFormHasVariants(false);
+      setFormVariants([
+        { variantName: 'Regular', price: Number(item.price) || 120 },
+        { variantName: 'Large', price: Math.round(Number(item.price) * 1.3) || 160 },
+      ]);
+    }
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formName.trim()) {
+      toast.error('Validation Error', 'Item name is required');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      let finalCategoryId = formCategoryId;
+
+      // Handle new category creation
+      if (isCreatingNewCat && formNewCategoryName.trim()) {
+        const catRes = await fetch('/api/menu/categories', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ name: formNewCategoryName.trim() }),
+        });
+        const catJson = await catRes.json();
+        if (catJson.success && catJson.data) {
+          finalCategoryId = catJson.data.id;
+          setCategories((prev) => [...prev, catJson.data]);
+        }
+      }
+
+      const payload = {
+        name: formName.trim(),
+        categoryId: finalCategoryId,
+        description: formDescription.trim(),
+        price: Number(formPrice) || 0,
+        isVeg: formIsVeg,
+        isChefSpecial: formIsChefSpecial,
+        isSpicy: formIsSpicy,
+        prepTimeMinutes: Number(formPrepTime) || 10,
+        isAvailable: formIsAvailable,
+        variants: formHasVariants
+          ? formVariants.filter((v) => v.variantName.trim()).map((v) => ({
+              id: v.id,
+              variantName: v.variantName.trim(),
+              price: Number(v.price) || 0,
+            }))
+          : [],
+      };
+
+      if (editingItem) {
+        const res = await fetch(`/api/menu/items/${editingItem.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+        const json = await res.json();
+        if (json.success && json.data) {
+          setItems((prev) =>
+            prev.map((it) => (it.id === editingItem.id ? { ...it, ...json.data } : it))
+          );
+          toast.success('Menu Item Altered', `"${formName}" updated successfully`);
+          setIsEditModalOpen(false);
+        } else {
+          toast.error('Alteration Failed', json.error || 'Could not update item');
+        }
+      } else {
+        const res = await fetch('/api/menu/items', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+        const json = await res.json();
+        if (json.success && json.data) {
+          setItems((prev) => [json.data, ...prev]);
+          toast.success('New Item Added', `"${formName}" added to the menu`);
+          setIsEditModalOpen(false);
+        } else {
+          toast.error('Creation Failed', json.error || 'Could not create item');
+        }
+      }
+    } catch (err: any) {
+      toast.error('Error', err.message || 'Operation failed');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteItem = async (item: MenuItem) => {
+    if (!window.confirm(`Are you sure you want to remove "${item.name}" from the active menu catalog?`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/menu/items/${item.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const json = await res.json();
+      if (json.success) {
+        setItems((prev) => prev.filter((it) => it.id !== item.id));
+        toast.info('Item Removed', `"${item.name}" was removed from the menu.`);
+      } else {
+        toast.error('Delete Failed', json.error || 'Could not delete item');
+      }
+    } catch (err: any) {
+      toast.error('Error', err.message);
+    }
+  };
 
   const fetchMenu = async () => {
     try {
@@ -172,10 +363,23 @@ export const MenuPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Parcel Charge Tag */}
-        <div className="flex items-center gap-2 p-2.5 bg-white border border-stone-200 rounded-2xl shadow-xs text-xs text-stone-600">
-          <Package className="w-4 h-4 text-rollify-red shrink-0" />
-          <span>Parcel charge: <strong className="text-stone-900 font-mono">₹10/-</strong> per order</span>
+        {/* Actions: Parcel Tag & Add Item Button */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-2 p-2.5 bg-white border border-stone-200 rounded-2xl shadow-xs text-xs text-stone-600">
+            <Package className="w-4 h-4 text-rollify-red shrink-0" />
+            <span>Parcel charge: <strong className="text-stone-900 font-mono">₹10/-</strong></span>
+          </div>
+
+          {hasRole('ADMIN', 'MANAGER') && (
+            <Button
+              variant="primary"
+              size="md"
+              onClick={openCreateModal}
+              leftIcon={<Plus className="w-4 h-4" />}
+            >
+              Add Menu Item
+            </Button>
+          )}
         </div>
       </div>
 
@@ -341,16 +545,43 @@ export const MenuPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-2 pt-4 mt-3 border-t border-stone-100">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs h-8 gap-1.5"
-                onClick={() => handleInspectRecipe(item)}
-                leftIcon={<Layers className="w-3.5 h-3.5" />}
-              >
-                Recipe Ingredients
-              </Button>
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-4 mt-3 border-t border-stone-100">
+              <div className="flex items-center gap-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs h-8 gap-1"
+                  onClick={() => handleInspectRecipe(item)}
+                  title="View Ingredient Deductions"
+                >
+                  <Layers className="w-3.5 h-3.5 text-stone-500" />
+                  <span className="hidden sm:inline">Recipe</span>
+                </Button>
+
+                {hasRole('ADMIN', 'MANAGER') && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-8 px-2.5 gap-1 text-stone-700 hover:text-stone-900 border-stone-200"
+                      onClick={() => openEditModal(item)}
+                      title="Alter Dish Details & Pricing"
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-[#F59E0B]" />
+                      <span>Alter</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-8 px-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200"
+                      onClick={() => handleDeleteItem(item)}
+                      title="Delete / Archive Item"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </>
+                )}
+              </div>
 
               {hasRole('ADMIN', 'KITCHEN') && (
                 <Button
@@ -362,7 +593,7 @@ export const MenuPage: React.FC = () => {
                   )}
                   onClick={() => toggleAvailability(item)}
                 >
-                  {item.is_available ? 'Available' : '86’d (Out of Stock)'}
+                  {item.is_available ? 'In Stock' : '86’d'}
                 </Button>
               )}
             </div>
@@ -432,6 +663,304 @@ export const MenuPage: React.FC = () => {
           </div>
         )}
       </Modal>
+
+      {/* Menu Item Alteration & Add Item Modal */}
+      {isEditModalOpen && (
+        <Modal
+          isOpen={true}
+          onClose={() => setIsEditModalOpen(false)}
+          maxWidth="lg"
+          title={
+            <div className="flex items-center gap-2">
+              <Pencil className="w-5 h-5 text-[#C8102E]" />
+              <span>{editingItem ? `Alter Menu Item: ${editingItem.name}` : 'Add New Menu Item'}</span>
+            </div>
+          }
+        >
+          <form onSubmit={handleSaveItem} className="space-y-4 py-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Item Name */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-stone-700">
+                  Item / Dish Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Crispy Paneer Tikka Roll"
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+                />
+              </div>
+
+              {/* Category */}
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <label className="block text-xs font-bold text-stone-700">
+                    Category *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsCreatingNewCat(!isCreatingNewCat)}
+                    className="text-[10px] font-bold text-[#C8102E] hover:underline"
+                  >
+                    {isCreatingNewCat ? 'Choose Existing' : '+ New Category'}
+                  </button>
+                </div>
+                {isCreatingNewCat ? (
+                  <input
+                    type="text"
+                    placeholder="e.g. Signature Mocktails"
+                    value={formNewCategoryName}
+                    onChange={(e) => setFormNewCategoryName(e.target.value)}
+                    className="w-full px-3 py-2 bg-amber-50 border border-amber-300 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+                  />
+                ) : (
+                  <select
+                    value={formCategoryId}
+                    onChange={(e) => setFormCategoryId(e.target.value)}
+                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+                  >
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            </div>
+
+            {/* Base Price & Prep Time */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-stone-700">
+                  Base Price (₹) *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  min="0"
+                  placeholder="e.g. 149"
+                  value={formPrice}
+                  onChange={(e) => setFormPrice(e.target.value)}
+                  className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-stone-700">
+                  Est. Kitchen Prep Time (Mins)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="120"
+                  value={formPrepTime}
+                  onChange={(e) => setFormPrepTime(Number(e.target.value) || 10)}
+                  className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+                />
+              </div>
+            </div>
+
+            {/* Variants Toggle & Editor */}
+            <div className="p-3 bg-stone-50 border border-stone-200 rounded-2xl space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-stone-800">
+                  <input
+                    type="checkbox"
+                    checked={formHasVariants}
+                    onChange={(e) => setFormHasVariants(e.target.checked)}
+                    className="w-4 h-4 rounded text-[#C8102E] accent-[#C8102E]"
+                  />
+                  <span>Has multiple portion sizes? (e.g. Regular & Large)</span>
+                </label>
+
+                {formHasVariants && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormVariants((prev) => [
+                        ...prev,
+                        { variantName: 'Portion ' + (prev.length + 1), price: formPrice },
+                      ])
+                    }
+                    className="text-[10px] font-bold text-[#C8102E] hover:underline"
+                  >
+                    + Add Size Variant
+                  </button>
+                )}
+              </div>
+
+              {formHasVariants && (
+                <div className="space-y-1.5 pt-1">
+                  {formVariants.map((v, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="Size (e.g. REG, LRG)"
+                        value={v.variantName}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setFormVariants((prev) =>
+                            prev.map((item, i) => (i === idx ? { ...item, variantName: val } : item))
+                          );
+                        }}
+                        className="flex-1 px-2.5 py-1.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#C8102E]"
+                      />
+                      <div className="relative w-28">
+                        <span className="absolute left-2.5 top-1.5 text-xs text-stone-400">₹</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="Price"
+                          value={v.price}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setFormVariants((prev) =>
+                              prev.map((item, i) => (i === idx ? { ...item, price: val } : item))
+                            );
+                          }}
+                          className="w-full pl-6 pr-2 py-1.5 bg-white border border-stone-200 rounded-xl text-xs font-mono font-bold focus:outline-none focus:ring-1 focus:ring-[#C8102E]"
+                        />
+                      </div>
+                      {formVariants.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setFormVariants((prev) => prev.filter((_, i) => i !== idx))}
+                          className="p-1 text-stone-400 hover:text-rose-600 rounded"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Food Type (Veg / Non-Veg) & Badges */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-stone-700">Food Type & Badges</label>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFormIsVeg(true)}
+                  className={clsx(
+                    'px-3 py-1.5 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 cursor-pointer',
+                    formIsVeg
+                      ? 'bg-emerald-50 border-emerald-400 text-emerald-800'
+                      : 'bg-white border-stone-200 text-stone-500 hover:bg-stone-50'
+                  )}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                  Pure Veg
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormIsVeg(false)}
+                  className={clsx(
+                    'px-3 py-1.5 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 cursor-pointer',
+                    !formIsVeg
+                      ? 'bg-rose-50 border-rose-400 text-rose-800'
+                      : 'bg-white border-stone-200 text-stone-500 hover:bg-stone-50'
+                  )}
+                >
+                  <span className="w-2 h-2 rounded-full bg-rose-600" />
+                  Non-Veg
+                </button>
+
+                <label className={clsx(
+                  'px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer transition flex items-center gap-1.5 select-none',
+                  formIsChefSpecial
+                    ? 'bg-amber-100 border-amber-400 text-amber-900'
+                    : 'bg-white border-stone-200 text-stone-500 hover:bg-stone-50'
+                )}>
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    checked={formIsChefSpecial}
+                    onChange={(e) => setFormIsChefSpecial(e.target.checked)}
+                  />
+                  <ChefHat className="w-3.5 h-3.5 text-amber-700" />
+                  Chef's Special
+                </label>
+
+                <label className={clsx(
+                  'px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer transition flex items-center gap-1.5 select-none',
+                  formIsSpicy
+                    ? 'bg-rose-100 border-rose-400 text-rose-900'
+                    : 'bg-white border-stone-200 text-stone-500 hover:bg-stone-50'
+                )}>
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    checked={formIsSpicy}
+                    onChange={(e) => setFormIsSpicy(e.target.checked)}
+                  />
+                  <Flame className="w-3.5 h-3.5 text-rose-600" />
+                  Spicy
+                </label>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-1">
+              <label className="block text-xs font-bold text-stone-700">
+                Menu Description (Optional)
+              </label>
+              <textarea
+                rows={2}
+                placeholder="Brief ingredients or flavour description..."
+                value={formDescription}
+                onChange={(e) => setFormDescription(e.target.value)}
+                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+              />
+            </div>
+
+            {/* Stock Availability */}
+            <div className="flex items-center justify-between pt-1 border-t border-stone-100 text-xs">
+              <span className="font-bold text-stone-700">Immediate Stock Availability</span>
+              <button
+                type="button"
+                onClick={() => setFormIsAvailable(!formIsAvailable)}
+                className={clsx(
+                  'px-3 py-1 rounded-xl font-bold transition border cursor-pointer',
+                  formIsAvailable
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                    : 'bg-rose-50 border-rose-300 text-rose-700'
+                )}
+              >
+                {formIsAvailable ? '✓ In Stock (Available)' : '✗ 86’d (Out of Stock)'}
+              </button>
+            </div>
+
+            {/* Submit / Cancel Buttons */}
+            <div className="flex justify-end gap-2 pt-3 border-t border-stone-100">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditModalOpen(false)}
+                disabled={isSaving}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                isLoading={isSaving}
+                leftIcon={<Check className="w-4 h-4" />}
+              >
+                {editingItem ? 'Save & Alter Item' : 'Create Menu Item'}
+              </Button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 };

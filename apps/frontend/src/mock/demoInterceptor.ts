@@ -223,14 +223,98 @@ export function initDemoInterceptor() {
     }
 
     // 4. MENU
-    if (path === '/api/menu/categories') {
+    if (path === '/api/menu/categories' && method === 'GET') {
       const cats = store.categories && store.categories.length > 0 ? store.categories : DEMO_CATEGORIES;
       return makeRes({ success: true, data: cats });
+    }
+
+    if (path === '/api/menu/categories' && method === 'POST') {
+      const catData = body || {};
+      const newCat = {
+        id: `cat-${Date.now()}`,
+        name: catData.name || 'New Category',
+        slug: (catData.name || 'new-category').toLowerCase().replace(/\s+/g, '-'),
+        description: catData.description || '',
+      };
+      if (!store.categories) store.categories = [...DEMO_CATEGORIES];
+      store.categories.push(newCat);
+      saveStore(store);
+      return makeRes({ success: true, data: newCat }, 201);
     }
 
     if (path === '/api/menu/items' && method === 'GET') {
       const items = store.items && store.items.length > 0 ? store.items : DEMO_MENU_ITEMS;
       return makeRes({ success: true, data: items });
+    }
+
+    if (path === '/api/menu/items' && method === 'POST') {
+      const itemData = body || {};
+      if (!store.items) store.items = [...DEMO_MENU_ITEMS];
+      const category = (store.categories || DEMO_CATEGORIES).find((c: any) => c.id === itemData.categoryId);
+      const newItem = {
+        id: `item-${Date.now()}`,
+        category_id: itemData.categoryId,
+        category_name: category?.name || 'General',
+        name: itemData.name,
+        description: itemData.description || '',
+        price: String(itemData.price),
+        tax_rate: String(itemData.taxRate || 5.0),
+        is_veg: Boolean(itemData.isVeg),
+        is_available: itemData.isAvailable !== false,
+        is_chef_special: Boolean(itemData.isChefSpecial),
+        is_spicy: Boolean(itemData.isSpicy),
+        prep_time_minutes: Number(itemData.prepTimeMinutes || 10),
+        variants: (itemData.variants || []).map((v: any, idx: number) => ({
+          id: `var-${Date.now()}-${idx}`,
+          variant_name: v.variantName,
+          price: v.price,
+          is_available: true,
+        })),
+      };
+      store.items.unshift(newItem);
+      saveStore(store);
+      return makeRes({ success: true, message: 'Item created', data: newItem }, 201);
+    }
+
+    if (path.startsWith('/api/menu/items/') && !path.endsWith('/availability') && method === 'PUT') {
+      const itemId = path.split('/')[4];
+      if (!store.items) store.items = [...DEMO_MENU_ITEMS];
+      const itemData = body || {};
+      const index = store.items.findIndex((i: any) => i.id === itemId);
+      if (index !== -1) {
+        const category = (store.categories || DEMO_CATEGORIES).find((c: any) => c.id === itemData.categoryId);
+        const updatedItem = {
+          ...store.items[index],
+          category_id: itemData.categoryId || store.items[index].category_id,
+          category_name: category?.name || store.items[index].category_name,
+          name: itemData.name || store.items[index].name,
+          description: itemData.description !== undefined ? itemData.description : store.items[index].description,
+          price: itemData.price !== undefined ? String(itemData.price) : store.items[index].price,
+          is_veg: itemData.isVeg !== undefined ? Boolean(itemData.isVeg) : store.items[index].is_veg,
+          is_available: itemData.isAvailable !== undefined ? Boolean(itemData.isAvailable) : store.items[index].is_available,
+          is_chef_special: itemData.isChefSpecial !== undefined ? Boolean(itemData.isChefSpecial) : store.items[index].is_chef_special,
+          is_spicy: itemData.isSpicy !== undefined ? Boolean(itemData.isSpicy) : store.items[index].is_spicy,
+          prep_time_minutes: itemData.prepTimeMinutes !== undefined ? Number(itemData.prepTimeMinutes) : store.items[index].prep_time_minutes,
+          variants: itemData.variants ? itemData.variants.map((v: any, idx: number) => ({
+            id: v.id || `var-${Date.now()}-${idx}`,
+            variant_name: v.variantName,
+            price: v.price,
+            is_available: true,
+          })) : store.items[index].variants,
+        };
+        store.items[index] = updatedItem;
+        saveStore(store);
+        return makeRes({ success: true, message: 'Item updated', data: updatedItem });
+      }
+      return makeRes({ success: false, error: 'Item not found' }, 404);
+    }
+
+    if (path.startsWith('/api/menu/items/') && method === 'DELETE') {
+      const itemId = path.split('/')[4];
+      if (!store.items) store.items = [...DEMO_MENU_ITEMS];
+      store.items = store.items.filter((i: any) => i.id !== itemId);
+      saveStore(store);
+      return makeRes({ success: true, message: 'Item deleted', data: { id: itemId } });
     }
 
     if (path.startsWith('/api/menu/items/') && path.endsWith('/availability') && method === 'PATCH') {
