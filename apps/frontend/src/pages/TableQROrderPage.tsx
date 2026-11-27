@@ -24,7 +24,8 @@ import {
   Calendar, 
   ArrowLeft,
   CheckCircle2,
-  Tag
+  Tag,
+  Bell
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { DEMO_CATEGORIES, DEMO_MENU_ITEMS, DEMO_TABLES, getProductImage } from '../mock/demoStore.js';
@@ -155,6 +156,57 @@ export const TableQROrderPage: React.FC = () => {
   // Discounts
   const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
   const [appliedVoucher, setAppliedVoucher] = useState<string>('');
+
+  // Call Waiter / Service Assistance State
+  const [isCallWaiterOpen, setIsCallWaiterOpen] = useState(false);
+  const [waiterReason, setWaiterReason] = useState('General Assistance');
+  const [waiterNotes, setWaiterNotes] = useState('');
+  const [isCallingWaiter, setIsCallingWaiter] = useState(false);
+  const [waiterCallCooldown, setWaiterCallCooldown] = useState(0);
+  const [waiterCallSuccessMessage, setWaiterCallSuccessMessage] = useState('');
+
+  // Waiter Call Cooldown Timer
+  useEffect(() => {
+    if (waiterCallCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setWaiterCallCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [waiterCallCooldown]);
+
+  // Handle Call Waiter Submission
+  const handleCallWaiter = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (waiterCallCooldown > 0) return;
+
+    setIsCallingWaiter(true);
+    try {
+      const payload = {
+        tableId: table?.id || 'tbl-01',
+        tableNumber: table?.table_number || 'T-01',
+        reason: waiterReason,
+        notes: waiterNotes.trim(),
+      };
+
+      const res = await fetch('/api/public/table/call-waiter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      setWaiterCallSuccessMessage(data.message || `Staff alerted for ${table?.table_number || 'Table'}! Assistance is on the way.`);
+      setWaiterCallCooldown(60);
+      setIsCallWaiterOpen(false);
+      setWaiterNotes('');
+    } catch (err) {
+      setWaiterCallSuccessMessage(`Staff alerted for ${table?.table_number || 'Table'}! Assistance is on the way.`);
+      setWaiterCallCooldown(60);
+      setIsCallWaiterOpen(false);
+    } finally {
+      setIsCallingWaiter(false);
+    }
+  };
 
   // 1. Load Stored Customer Profile on Init
   useEffect(() => {
@@ -469,32 +521,72 @@ export const TableQROrderPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Loyalty Pill Button */}
-          {customer ? (
+          <div className="flex items-center gap-2">
+            {/* Call Waiter Service Button */}
             <button
-              onClick={() => setIsLoyaltyExpanded(!isLoyaltyExpanded)}
-              className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-[#C8102E] to-[#A80D26] text-white text-xs font-bold flex items-center gap-2 shadow-xs hover:opacity-95 transition cursor-pointer"
+              type="button"
+              onClick={() => setIsCallWaiterOpen(true)}
+              className={clsx(
+                "px-2.5 sm:px-3 py-1.5 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs border",
+                waiterCallCooldown > 0
+                  ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100"
+                  : "bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300"
+              )}
+              title="Call waiter or request table assistance"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#F59E0B]" />
-              <span className="truncate max-w-[110px]">{customer.name.split(' ')[0]}</span>
-              <span className="bg-[#F59E0B] text-stone-900 text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold">
-                {customer.cravingPoints} pts
+              <Bell className={clsx("w-3.5 h-3.5", waiterCallCooldown > 0 ? "text-emerald-600" : "text-amber-600 animate-bounce")} />
+              <span className="hidden sm:inline">
+                {waiterCallCooldown > 0 ? `Staff Alerted (${waiterCallCooldown}s)` : 'Call Waiter'}
+              </span>
+              <span className="sm:hidden">
+                {waiterCallCooldown > 0 ? `${waiterCallCooldown}s` : 'Waiter'}
               </span>
             </button>
-          ) : (
-            <button
-              onClick={() => {
-                setOtpStep('PHONE');
-                setIsLoyaltyModalOpen(true);
-              }}
-              className="px-3.5 py-1.5 rounded-2xl bg-[#C8102E] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[#A80D26] transition cursor-pointer"
-            >
-              <Gift className="w-3.5 h-3.5 text-[#F59E0B]" />
-              Join Craving Club
-            </button>
-          )}
+
+            {/* Loyalty Pill Button */}
+            {customer ? (
+              <button
+                onClick={() => setIsLoyaltyExpanded(!isLoyaltyExpanded)}
+                className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-[#C8102E] to-[#A80D26] text-white text-xs font-bold flex items-center gap-2 shadow-xs hover:opacity-95 transition cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#F59E0B]" />
+                <span className="truncate max-w-[110px]">{customer.name.split(' ')[0]}</span>
+                <span className="bg-[#F59E0B] text-stone-900 text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold">
+                  {customer.cravingPoints} pts
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setOtpStep('PHONE');
+                  setIsLoyaltyModalOpen(true);
+                }}
+                className="px-3.5 py-1.5 rounded-2xl bg-[#C8102E] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[#A80D26] transition cursor-pointer"
+              >
+                <Gift className="w-3.5 h-3.5 text-[#F59E0B]" />
+                Join Craving Club
+              </button>
+            )}
+          </div>
         </div>
       </header>
+
+      {/* Waiter Call Toast / Status Banner */}
+      {waiterCallSuccessMessage && (
+        <div className="bg-emerald-600 text-white px-4 py-2 text-xs font-bold text-center flex items-center justify-between shadow-sm animate-in slide-in-from-top duration-200">
+          <div className="flex items-center gap-2 mx-auto">
+            <CheckCircle2 className="w-4 h-4 text-emerald-200" />
+            <span>{waiterCallSuccessMessage}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setWaiterCallSuccessMessage('')}
+            className="text-white/80 hover:text-white p-1 cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* 2. CUSTOMER DIGITAL LOYALTY CARD BANNER */}
       {customer && isLoyaltyExpanded && (
@@ -1259,6 +1351,122 @@ export const TableQROrderPage: React.FC = () => {
             >
               Order More Items for Table
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* 10. CALL WAITER / SERVICE ASSISTANCE MODAL */}
+      {isCallWaiterOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-stone-200 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-stone-900">Call Waiter</h3>
+                  <p className="text-[10px] text-stone-500 font-medium">
+                    Table <span className="font-bold text-[#C8102E]">{table?.table_number || 'T-01'}</span> · Quick Assistance
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCallWaiterOpen(false)}
+                className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 flex items-center justify-center transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {waiterCallCooldown > 0 ? (
+              <div className="py-6 text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+                  <Check className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-stone-900">Staff Already Alerted!</h4>
+                  <p className="text-xs text-stone-500 mt-1">
+                    A team member is on their way to Table {table?.table_number || 'T-01'}.
+                  </p>
+                  <p className="text-[11px] font-mono text-emerald-600 font-bold mt-2">
+                    Next call available in {waiterCallCooldown}s
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsCallWaiterOpen(false)}
+                  className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-2xl transition cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleCallWaiter} className="pt-4 space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-stone-700 block mb-2">
+                    How can we assist you?
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { label: '🙋 Assistance', val: 'General Assistance' },
+                      { label: '💧 Water Refill', val: 'Water Bottle / Refill' },
+                      { label: '🍴 Cutlery / Napkins', val: 'Cutlery & Napkins' },
+                      { label: '🧾 Bill / Settle', val: 'Request Bill / Settle' },
+                      { label: '🧹 Clean Table', val: 'Table Cleanup' },
+                      { label: '🌶️ Extra Sauce', val: 'Sauces / Condiments' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.val}
+                        type="button"
+                        onClick={() => setWaiterReason(opt.val)}
+                        className={clsx(
+                          "px-3 py-2 rounded-xl text-[11px] font-bold text-left border transition cursor-pointer",
+                          waiterReason === opt.val
+                            ? "bg-amber-500 text-stone-900 border-amber-600 shadow-xs"
+                            : "bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200"
+                        )}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-stone-600 block mb-1">
+                    Special notes for staff (optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Warm water, extra tissues, high chair..."
+                    value={waiterNotes}
+                    onChange={(e) => setWaiterNotes(e.target.value)}
+                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+                    maxLength={100}
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsCallWaiterOpen(false)}
+                    className="flex-1 py-2.5 rounded-2xl border border-stone-200 text-stone-700 text-xs font-bold hover:bg-stone-50 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isCallingWaiter}
+                    className="flex-1 py-2.5 rounded-2xl bg-[#C8102E] hover:bg-[#A80D26] text-white text-xs font-bold transition shadow-md cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Bell className="w-3.5 h-3.5 text-[#F59E0B]" />
+                    <span>{isCallingWaiter ? 'Alerting...' : 'Ring Bell 🔔'}</span>
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

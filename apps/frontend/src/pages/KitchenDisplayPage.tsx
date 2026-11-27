@@ -84,6 +84,28 @@ export const KitchenDisplayPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'NEW' | 'PREPARING' | 'READY'>('ALL');
+  const [waiterCalls, setWaiterCalls] = useState<Array<{ id: string; tableNumber: string; reason: string; notes?: string; time: string }>>([]);
+
+  const handleWaiterCall = (payload: any) => {
+    if (!payload) return;
+    if (soundEnabled) {
+      playKitchenChime();
+    }
+    toast.warning(`Table ${payload.tableNumber} Calling Staff`, `${payload.reason}${payload.notes ? ` • ${payload.notes}` : ''}`);
+    setWaiterCalls((prev) => {
+      if (prev.some((c) => c.id === payload.id)) return prev;
+      return [
+        {
+          id: payload.id || `call-${Date.now()}`,
+          tableNumber: payload.tableNumber || 'Table',
+          reason: payload.reason || 'General Assistance',
+          notes: payload.notes || '',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+        ...prev,
+      ].slice(0, 10);
+    });
+  };
 
   // Reject Order Modal
   const [rejectTicket, setRejectTicket] = useState<KDSTicket | null>(null);
@@ -119,13 +141,19 @@ export const KitchenDisplayPage: React.FC = () => {
       }
     };
 
+    const handleWaiterCustomEvent = (e: any) => {
+      handleWaiterCall(e.detail);
+    };
+
     window.addEventListener('storage', handleStorageOrCustomEvent);
     window.addEventListener('rollify:new_order', handleStorageOrCustomEvent);
+    window.addEventListener('rollify:call_waiter', handleWaiterCustomEvent);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('storage', handleStorageOrCustomEvent);
       window.removeEventListener('rollify:new_order', handleStorageOrCustomEvent);
+      window.removeEventListener('rollify:call_waiter', handleWaiterCustomEvent);
     };
   }, [token, soundEnabled]);
 
@@ -156,11 +184,13 @@ export const KitchenDisplayPage: React.FC = () => {
     socket.on('order:kitchen_ticket', handleKitchenTicket);
     socket.on('order:items_added', handleItemsAdded);
     socket.on('order:status_updated', handleStatusUpdated);
+    socket.on('table:call_waiter', handleWaiterCall);
 
     return () => {
       socket.off('order:kitchen_ticket', handleKitchenTicket);
       socket.off('order:items_added', handleItemsAdded);
       socket.off('order:status_updated', handleStatusUpdated);
+      socket.off('table:call_waiter', handleWaiterCall);
     };
   }, [socket, soundEnabled]);
 
@@ -314,6 +344,49 @@ export const KitchenDisplayPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Active Table Assistance Requests Banner */}
+      {waiterCalls.length > 0 && (
+        <div className="bg-[#1C1917] border-2 border-amber-500/40 rounded-3xl p-4 shadow-xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-amber-400 font-black text-xs uppercase tracking-wider">
+              <Bell className="w-4 h-4 animate-bounce text-amber-400" />
+              <span>Customer Assistance Calls ({waiterCalls.length})</span>
+            </div>
+            <button
+              onClick={() => setWaiterCalls([])}
+              className="text-[11px] font-bold text-stone-400 hover:text-white transition cursor-pointer"
+            >
+              Clear All Calls
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+            {waiterCalls.map((call) => (
+              <div
+                key={call.id}
+                className="bg-stone-900/90 border border-amber-500/30 rounded-2xl p-3 flex items-center justify-between text-xs shadow-sm"
+              >
+                <div>
+                  <div className="flex items-center gap-1.5 font-bold text-white">
+                    <span className="px-2 py-0.5 rounded-lg bg-amber-500 text-stone-950 font-mono text-[10px] font-black">
+                      {call.tableNumber}
+                    </span>
+                    <span className="text-amber-200">{call.reason}</span>
+                  </div>
+                  {call.notes && <p className="text-[11px] text-stone-300 mt-1 italic">"{call.notes}"</p>}
+                  <span className="text-[10px] text-stone-400 font-mono mt-1 block">{call.time}</span>
+                </div>
+                <button
+                  onClick={() => setWaiterCalls((prev) => prev.filter((c) => c.id !== call.id))}
+                  className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] transition cursor-pointer shrink-0 ml-2"
+                >
+                  Attended ✓
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tickets Grid */}
       {filteredTickets.length === 0 ? (

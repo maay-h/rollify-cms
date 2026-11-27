@@ -1003,6 +1003,37 @@ export function initDemoInterceptor() {
       }, 201);
     }
 
+    // ==========================================
+    // 13. CALL WAITER / SERVICE ASSISTANCE
+    // ==========================================
+    if (
+      (path === '/api/public/table-call-waiter' ||
+       path === '/api/public/table/call-waiter' ||
+       path === '/api/customer-qr/table/call-waiter' ||
+       path.includes('/call-waiter')) &&
+      method === 'POST'
+    ) {
+      const callData = {
+        id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        tableId: body.tableId || 'tbl-01',
+        tableNumber: body.tableNumber || 'T-01',
+        reason: body.reason || 'General Assistance',
+        notes: body.notes || '',
+        createdAt: new Date().toISOString(),
+      };
+
+      try {
+        window.dispatchEvent(new CustomEvent('rollify:call_waiter', { detail: callData }));
+        localStorage.setItem('rollify_last_waiter_call', JSON.stringify(callData));
+      } catch (e) {}
+
+      return makeRes({
+        success: true,
+        message: `Staff alerted for ${callData.tableNumber}. Assistance is on the way!`,
+        data: callData,
+      });
+    }
+
     // Default fallback
     return makeRes({ success: true, data: [] });
   };

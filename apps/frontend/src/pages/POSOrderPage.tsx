@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
+import { useSocket } from '../context/SocketContext.js';
 import { useToast } from '../context/ToastContext.js';
 import { Card } from '../components/ui/Card.js';
 import { Button } from '../components/ui/Button.js';
@@ -24,7 +25,8 @@ import {
   Sparkles,
   Coffee,
   CupSoda,
-  Tag
+  Tag,
+  Bell
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { DEMO_CATEGORIES, DEMO_MENU_ITEMS, DEMO_TABLES, getProductImage } from '../mock/demoStore.js';
@@ -86,8 +88,29 @@ const SPECIAL_INSTRUCTION_PRESETS = [
   'Serve Hot',
 ];
 
+// Service Bell Chime generator using Web Audio API
+function playServiceBellChime() {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(700, ctx.currentTime + 0.5);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.5);
+  } catch (e) {
+    // Ignore audio permission errors
+  }
+}
+
 export const POSOrderPage: React.FC = () => {
   const { token, user } = useAuth();
+  const { socket } = useSocket();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -95,6 +118,44 @@ export const POSOrderPage: React.FC = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [tables, setTables] = useState<DiningTable[]>([]);
   const [loading, setLoading] = useState(true);
+  const [waiterCalls, setWaiterCalls] = useState<Array<{ id: string; tableNumber: string; reason: string; notes?: string; time: string }>>([]);
+
+  const handleWaiterCall = (payload: any) => {
+    if (!payload) return;
+    playServiceBellChime();
+    toast.warning(`Table ${payload.tableNumber} Requesting Service`, `${payload.reason}${payload.notes ? ` • ${payload.notes}` : ''}`);
+    setWaiterCalls((prev) => {
+      if (prev.some((c) => c.id === payload.id)) return prev;
+      return [
+        {
+          id: payload.id || `call-${Date.now()}`,
+          tableNumber: payload.tableNumber || 'Table',
+          reason: payload.reason || 'General Assistance',
+          notes: payload.notes || '',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+        ...prev,
+      ].slice(0, 10);
+    });
+  };
+
+  useEffect(() => {
+    const handleWaiterCustomEvent = (e: any) => {
+      handleWaiterCall(e.detail);
+    };
+    window.addEventListener('rollify:call_waiter', handleWaiterCustomEvent);
+
+    if (socket) {
+      socket.on('table:call_waiter', handleWaiterCall);
+    }
+
+    return () => {
+      window.removeEventListener('rollify:call_waiter', handleWaiterCustomEvent);
+      if (socket) {
+        socket.off('table:call_waiter', handleWaiterCall);
+      }
+    };
+  }, [socket]);
 
   // Filters
   const [selectedCat, setSelectedCat] = useState<string>('ALL');
@@ -368,7 +429,51 @@ export const POSOrderPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-5 max-w-[1750px] mx-auto min-h-[calc(100vh-100px)] lg:h-[calc(100vh-100px)]">
+    <div className="space-y-4 max-w-[1750px] mx-auto min-h-[calc(100vh-100px)]">
+      {/* Active Waiter Call Assistance Alerts */}
+      {waiterCalls.length > 0 && (
+        <div className="bg-amber-50 border-2 border-amber-400 rounded-3xl p-3.5 shadow-sm space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-amber-900 font-black text-xs uppercase tracking-wider">
+              <Bell className="w-4 h-4 animate-bounce text-amber-600" />
+              <span>Customer Assistance Calls ({waiterCalls.length} Pending)</span>
+            </div>
+            <button
+              onClick={() => setWaiterCalls([])}
+              className="text-[11px] font-bold text-stone-500 hover:text-stone-800 transition cursor-pointer"
+            >
+              Dismiss All
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {waiterCalls.map((call) => (
+              <div
+                key={call.id}
+                className="bg-white border border-amber-300 rounded-2xl p-2.5 flex items-center justify-between text-xs shadow-xs"
+              >
+                <div>
+                  <div className="flex items-center gap-1.5 font-bold text-stone-900">
+                    <span className="px-2 py-0.5 rounded-lg bg-amber-500 text-stone-950 font-mono text-[10px] font-black">
+                      {call.tableNumber}
+                    </span>
+                    <span className="text-amber-900">{call.reason}</span>
+                  </div>
+                  {call.notes && <p className="text-[11px] text-stone-500 mt-0.5 italic">"{call.notes}"</p>}
+                  <span className="text-[10px] text-stone-400 font-mono mt-0.5 block">{call.time}</span>
+                </div>
+                <button
+                  onClick={() => setWaiterCalls((prev) => prev.filter((c) => c.id !== call.id))}
+                  className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] transition cursor-pointer shrink-0 ml-2 shadow-xs"
+                >
+                  Attended ✓
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col lg:flex-row gap-5 lg:h-[calc(100vh-100px)]">
       {/* LEFT: Menu Browsing & Item Selection (70% width) */}
       <div className="flex-1 flex flex-col bg-white rounded-3xl border border-stone-200/80 p-4 sm:p-5 shadow-xs min-w-0 overflow-hidden min-h-[550px] lg:min-h-0">
         {/* Top Controls: Search + Veg Filter */}
@@ -875,6 +980,7 @@ export const POSOrderPage: React.FC = () => {
           </div>
         </Modal>
       )}
+      </div>
     </div>
   );
 };

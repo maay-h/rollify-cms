@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.js';
+import { useSocket } from '../context/SocketContext.js';
 import { useToast } from '../context/ToastContext.js';
 import { Card } from '../components/ui/Card.js';
 import { Button } from '../components/ui/Button.js';
@@ -18,7 +19,8 @@ import {
   Printer,
   ExternalLink,
   Copy,
-  Sparkles
+  Sparkles,
+  Bell
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { DEMO_TABLES } from '../mock/demoStore.js';
@@ -38,6 +40,7 @@ interface DiningTable {
 
 export const TablesPage: React.FC = () => {
   const { token, hasRole } = useAuth();
+  const { socket } = useSocket();
   const toast = useToast();
 
   const [tables, setTables] = useState<DiningTable[]>([]);
@@ -48,6 +51,48 @@ export const TablesPage: React.FC = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [qrModalTable, setQrModalTable] = useState<DiningTable | null>(null);
+  const [activeCallsByTable, setActiveCallsByTable] = useState<Record<string, { reason: string; notes?: string; time: string }>>({});
+
+  const handleWaiterCall = (payload: any) => {
+    if (!payload) return;
+    const key = (payload.tableNumber || '').trim();
+    if (!key) return;
+    toast.warning(`Table ${key} Calling Staff`, `${payload.reason}${payload.notes ? ` • ${payload.notes}` : ''}`);
+    setActiveCallsByTable((prev) => ({
+      ...prev,
+      [key]: {
+        reason: payload.reason || 'Assistance Needed',
+        notes: payload.notes || '',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    }));
+  };
+
+  useEffect(() => {
+    const handleWaiterCustomEvent = (e: any) => {
+      handleWaiterCall(e.detail);
+    };
+    window.addEventListener('rollify:call_waiter', handleWaiterCustomEvent);
+
+    if (socket) {
+      socket.on('table:call_waiter', handleWaiterCall);
+    }
+
+    return () => {
+      window.removeEventListener('rollify:call_waiter', handleWaiterCustomEvent);
+      if (socket) {
+        socket.off('table:call_waiter', handleWaiterCall);
+      }
+    };
+  }, [socket]);
+
+  const dismissTableCall = (tableNumber: string) => {
+    setActiveCallsByTable((prev) => {
+      const next = { ...prev };
+      delete next[tableNumber];
+      return next;
+    });
+  };
 
   const fetchTables = async () => {
     try {
@@ -212,6 +257,23 @@ export const TablesPage: React.FC = () => {
                 View QR Tent Card
               </button>
             </div>
+
+            {/* Active Waiter Call Assistance Alert */}
+            {activeCallsByTable[table.table_number] && (
+              <div className="mt-2.5 p-2 bg-amber-500 text-stone-950 rounded-xl text-xs font-bold flex items-center justify-between shadow-xs animate-pulse">
+                <div className="flex items-center gap-1.5 truncate">
+                  <Bell className="w-3.5 h-3.5 shrink-0 text-stone-950" />
+                  <span className="truncate">{activeCallsByTable[table.table_number].reason}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => dismissTableCall(table.table_number)}
+                  className="px-2 py-0.5 rounded-md bg-stone-950 text-white text-[10px] font-mono hover:bg-stone-800 transition cursor-pointer"
+                >
+                  Attended ✓
+                </button>
+              </div>
+            )}
 
             {/* Quick Status Action Buttons */}
             <div className="mt-4 pt-1">

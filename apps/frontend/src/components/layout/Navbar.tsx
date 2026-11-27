@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { 
-  Wifi, 
-  WifiOff, 
   LogOut, 
   KeyRound, 
   Shield, 
@@ -20,7 +18,6 @@ import {
   BarChart3 
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
-import { useSocket } from '../../context/SocketContext.js';
 import { RollifyLogo } from '../common/RollifyLogo.js';
 import { Button } from '../ui/Button.js';
 import { Modal } from '../ui/Modal.js';
@@ -29,7 +26,6 @@ import { clsx } from 'clsx';
 
 export const Navbar: React.FC = () => {
   const { user, logout, pinLogin } = useAuth();
-  const { status, latency, reconnect } = useSocket();
   const navigate = useNavigate();
   const [isSwitchOpen, setIsSwitchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -114,31 +110,6 @@ export const Navbar: React.FC = () => {
 
         {/* Status Indicators & User Badge */}
         <div className="flex items-center gap-3">
-          {/* Real-time Connection Status */}
-          <button
-            type="button"
-            onClick={() => reconnect()}
-            title={status === 'connected' ? `Live real-time stream active (${latency || 0}ms)` : 'Click to reconnect live real-time sync'}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-100 text-[11px] font-medium text-stone-600 border border-stone-200/60 hover:bg-stone-200/70 transition-all cursor-pointer"
-          >
-            {status === 'connected' ? (
-              <>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-semibold text-emerald-700">Live Synced</span>
-              </>
-            ) : status === 'connecting' ? (
-              <>
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-                <span className="text-amber-700 font-semibold">Connecting...</span>
-              </>
-            ) : (
-              <>
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
-                <span className="text-stone-700 font-semibold">Connecting to Cloud</span>
-              </>
-            )}
-          </button>
-
           {/* User profile & quick switch */}
           {user && (
             <div className="flex items-center gap-2">

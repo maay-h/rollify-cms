@@ -535,3 +535,62 @@ customerQrRouter.post('/table-order', async (req: Request, res: Response, next: 
     next(err);
   }
 });
+
+// 3. CALL WAITER / SERVICE ASSISTANCE
+const callWaiterHandler = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { qrToken } = req.params;
+    const { tableId, tableNumber, reason, notes } = req.body;
+
+    let resolvedTableNumber = tableNumber;
+    let resolvedTableId = tableId;
+
+    if (qrToken || tableId) {
+      const lookupVal = qrToken || tableId;
+      try {
+        const tableRes = await db.query(
+          `SELECT id, table_number, section FROM dining_tables WHERE qr_token = $1 OR id = $1 OR table_number = $1 LIMIT 1`,
+          [lookupVal]
+        );
+        if (tableRes.rows.length > 0) {
+          resolvedTableNumber = tableRes.rows[0].table_number;
+          resolvedTableId = tableRes.rows[0].id;
+        }
+      } catch (err) {
+        // fallback to body parameters
+      }
+    }
+
+    const payload = {
+      id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      tableId: resolvedTableId || 'unknown',
+      tableNumber: resolvedTableNumber || 'Table',
+      reason: reason || 'General Assistance',
+      notes: notes || '',
+      createdAt: new Date().toISOString(),
+    };
+
+    const io = getIO();
+    if (io) {
+      io.emit('table:call_waiter', payload);
+      io.emit('notification:alert', {
+        title: `Waiter Call: ${payload.tableNumber}`,
+        message: `${payload.reason}${payload.notes ? ` - ${payload.notes}` : ''}`,
+        type: 'WAITER_CALL',
+        data: payload,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Staff alerted for ${payload.tableNumber}. Assistance is on the way!`,
+      data: payload,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+customerQrRouter.post('/table/:qrToken/call-waiter', callWaiterHandler);
+customerQrRouter.post('/table/call-waiter', callWaiterHandler);
+customerQrRouter.post('/table-call-waiter', callWaiterHandler);
