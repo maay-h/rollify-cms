@@ -68,10 +68,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, bil
           {/* Header */}
           <div className="text-center pb-3 border-b-2 border-dashed border-stone-300">
             <h2 className="text-lg font-black tracking-tight uppercase font-sans text-stone-950">
-              ROLLIFY
+              POS
             </h2>
             <p className="text-[10px] font-bold text-stone-600 uppercase tracking-wider font-sans">
-              A Community of Flavours
+              Cloud POS Terminal
             </p>
             <p className="text-[9px] text-stone-500 mt-1">
               For Online Orders: 98455 71817 | 96116 39964
@@ -210,10 +210,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, bil
           {/* Footer Tagline */}
           <div className="text-center pt-3 text-[10px] text-stone-500 space-y-1">
             <p className="font-bold text-stone-800">
-              “Every Dip is Rollify way - Made in House”
+              “Thank you for dining with us!”
             </p>
-            <p>Thank you for dining with Rollify!</p>
-            <p className="text-[8px] text-stone-400">Powered by Rollify Cloud POS</p>
+            <p>We appreciate your visit.</p>
+            <p className="text-[8px] text-stone-400">Powered by Cloud POS</p>
           </div>
         </div>
 

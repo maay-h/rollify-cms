@@ -453,12 +453,12 @@ export const TableQROrderPage: React.FC = () => {
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-stone-200/80 px-4 py-3 shadow-xs">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#C8102E] text-white flex items-center justify-center font-black text-lg shadow-xs">
-              R
+            <div className="w-10 h-10 rounded-2xl bg-[#C8102E] text-white flex items-center justify-center font-black text-xs shadow-xs tracking-tight">
+              POS
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h1 className="text-base font-black tracking-tight text-stone-900">Rollify Cafe</h1>
+                <h1 className="text-base font-black tracking-tight text-stone-900">POS</h1>
                 <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-100 text-[#C8102E]">
                   Table {table?.table_number || 'T-01'}
                 </span>

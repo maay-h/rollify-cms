@@ -23,7 +23,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF8F5]">
-        <LoadingSpinner text="Authenticating Rollify Terminal..." size="lg" />
+        <LoadingSpinner text="Authenticating POS Terminal..." size="lg" />
       </div>
     );
   }

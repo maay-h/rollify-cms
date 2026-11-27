@@ -164,7 +164,7 @@ export const DashboardPage: React.FC = () => {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold backdrop-blur-xs text-amber-200">
               <Sparkles className="w-3.5 h-3.5 text-rollify-gold" />
-              <span>Rollify Cafe • Flagship Terminal</span>
+              <span>POS • Cloud Terminal</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
               Welcome back, {user?.fullName || user?.username || 'Cafe Team'}!

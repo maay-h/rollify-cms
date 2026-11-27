@@ -110,9 +110,9 @@ export const Sidebar: React.FC = () => {
       <div className="p-4 border-t border-stone-100 bg-stone-50/50">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-rollify-gold" />
-          <span className="text-xs font-semibold text-stone-700">Rollify POS</span>
+          <span className="text-xs font-semibold text-stone-700">POS</span>
         </div>
-        <p className="text-[10px] text-stone-400 mt-0.5">A community of flavours</p>
+        <p className="text-[10px] text-stone-400 mt-0.5">Cloud Terminal System</p>
       </div>
     </aside>
   );

@@ -128,7 +128,7 @@ export const AnalyticsReportsPage: React.FC = () => {
     }
 
     const lines: string[] = [];
-    lines.push('ROLLIFY CAFE - FINANCIAL & SALES REPORT');
+    lines.push('POS - FINANCIAL & SALES REPORT');
     lines.push(`Generated At,${new Date().toLocaleString()}`);
     lines.push(`Filter Range,${startDate || 'All Time'} to ${endDate || 'Present'}`);
     lines.push('');
@@ -182,7 +182,7 @@ export const AnalyticsReportsPage: React.FC = () => {
     const csvContent = 'data:text/csv;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
     const link = document.createElement('a');
     link.setAttribute('href', csvContent);
-    link.setAttribute('download', `Rollify_Cafe_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `POS_Sales_Report_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

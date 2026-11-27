@@ -128,7 +128,7 @@ export const LoginPage: React.FC = () => {
           <div className="flex flex-col items-center mb-6">
             <RollifyLogo size="lg" />
             <p className="text-xs text-stone-500 mt-3 font-medium text-center">
-              Cafe POS & Cloud Management Terminal
+              Cloud POS & Management Terminal
             </p>
           </div>
 
@@ -300,7 +300,7 @@ export const LoginPage: React.FC = () => {
 
       {/* Footer Info */}
       <footer className="relative z-10 text-center py-4 text-xs font-semibold text-white/80">
-        Rollify — A Community of Flavours • Cafe POS Terminal System
+        POS • Modern Cloud Terminal System
       </footer>
     </div>
   );

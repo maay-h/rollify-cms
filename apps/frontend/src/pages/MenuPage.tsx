@@ -152,7 +152,7 @@ export const MenuPage: React.FC = () => {
   });
 
   if (loading) {
-    return <LoadingSpinner text="Loading Rollify menu & recipe catalog..." />;
+    return <LoadingSpinner text="Loading menu & recipe catalog..." />;
   }
 
   return (
@@ -162,7 +162,7 @@ export const MenuPage: React.FC = () => {
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rollify-gold/15 text-rollify-gold-900 text-xs font-bold mb-1.5">
             <Sparkles className="w-3.5 h-3.5 text-rollify-gold-700" />
-            <span>Official Rollify Catalog • 15 Categories • 101 Items</span>
+            <span>Official Menu Catalog • 15 Categories • 101 Items</span>
           </div>
           <h1 className="text-2xl font-black text-stone-900 tracking-tight">
             Menu Catalog & Pricing Matrix

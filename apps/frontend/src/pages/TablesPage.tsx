@@ -310,11 +310,11 @@ export const TablesPage: React.FC = () => {
 
                   {/* Brand Header */}
                   <div className="flex items-center justify-center gap-2 mb-2 mt-2">
-                    <div className="w-8 h-8 rounded-xl bg-[#C8102E] text-[#F59E0B] flex items-center justify-center font-black text-sm shadow-xs">
-                      R
+                    <div className="w-8 h-8 rounded-xl bg-[#C8102E] text-white flex items-center justify-center font-black text-xs shadow-xs tracking-tight">
+                      POS
                     </div>
                     <span className="text-base font-black tracking-tight text-[#18181B]">
-                      ROLLIFY CAFE
+                      POS
                     </span>
                   </div>
 
