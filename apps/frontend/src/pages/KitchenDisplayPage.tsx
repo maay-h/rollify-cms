@@ -525,7 +525,7 @@ export const KitchenDisplayPage: React.FC = () => {
         >
           <div className="space-y-4">
             <p className="text-xs text-stone-600">
-              Please specify a reason for rejecting this order. The waiter and cashier will be alerted and the table will be freed:
+              Please specify a reason for rejecting this order. The cashier will be alerted and the table will be freed:
             </p>
 
             <div className="space-y-2">

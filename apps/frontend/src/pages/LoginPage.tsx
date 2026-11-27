@@ -23,9 +23,6 @@ export const LoginPage: React.FC = () => {
       case 'KITCHEN':
         navigate('/kitchen');
         break;
-      case 'WAITER':
-        navigate('/pos');
-        break;
       case 'CASHIER':
         navigate('/billing');
         break;
@@ -260,7 +257,7 @@ export const LoginPage: React.FC = () => {
             <p className="text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-2 text-center">
               Quick Staff Sign-In (PIN)
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => handleQuickStaffLogin('ADMIN', '1111', 'admin')}
@@ -276,14 +273,6 @@ export const LoginPage: React.FC = () => {
               >
                 <span className="block text-xs font-bold text-emerald-900">Cashier</span>
                 <span className="block text-[10px] text-emerald-600 font-mono">PIN: 3333</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickStaffLogin('WAITER', '4444', 'waiter')}
-                className="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-left transition"
-              >
-                <span className="block text-xs font-bold text-amber-900">Waiter</span>
-                <span className="block text-[10px] text-amber-600 font-mono">PIN: 4444</span>
               </button>
               <button
                 type="button"

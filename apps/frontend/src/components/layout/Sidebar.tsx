@@ -22,13 +22,13 @@ export const Sidebar: React.FC = () => {
       to: '/dashboard',
       label: 'Operations Dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
-      roles: ['ADMIN', 'CASHIER', 'WAITER', 'KITCHEN'],
+      roles: ['ADMIN', 'CASHIER', 'KITCHEN'],
     },
     {
       to: '/pos',
       label: 'Order Entry (POS)',
       icon: <ShoppingCart className="w-5 h-5" />,
-      roles: ['ADMIN', 'CASHIER', 'WAITER'],
+      roles: ['ADMIN', 'CASHIER'],
     },
     {
       to: '/kitchen',
@@ -46,19 +46,19 @@ export const Sidebar: React.FC = () => {
       to: '/orders',
       label: 'Order Management',
       icon: <ListOrdered className="w-5 h-5" />,
-      roles: ['ADMIN', 'CASHIER', 'WAITER', 'KITCHEN'],
+      roles: ['ADMIN', 'CASHIER', 'KITCHEN'],
     },
     {
       to: '/tables',
       label: 'Table Management',
       icon: <UtensilsCrossed className="w-5 h-5" />,
-      roles: ['ADMIN', 'CASHIER', 'WAITER'],
+      roles: ['ADMIN', 'CASHIER'],
     },
     {
       to: '/menu',
       label: 'Menu Management',
       icon: <BookOpen className="w-5 h-5" />,
-      roles: ['ADMIN', 'CASHIER', 'WAITER', 'KITCHEN'],
+      roles: ['ADMIN', 'CASHIER', 'KITCHEN'],
     },
     {
       to: '/users',

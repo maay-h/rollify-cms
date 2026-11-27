@@ -38,13 +38,13 @@ export const Navbar: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navItems = [
-    { to: '/dashboard', label: 'Operations Dashboard', icon: <LayoutDashboard className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'WAITER', 'KITCHEN'] },
-    { to: '/pos', label: 'Order Entry (POS)', icon: <ShoppingCart className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'WAITER'] },
+    { to: '/dashboard', label: 'Operations Dashboard', icon: <LayoutDashboard className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'KITCHEN'] },
+    { to: '/pos', label: 'Order Entry (POS)', icon: <ShoppingCart className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER'] },
     { to: '/kitchen', label: 'Kitchen Display (KDS)', icon: <ChefHat className="w-4 h-4" />, roles: ['ADMIN', 'KITCHEN'] },
     { to: '/billing', label: 'Cashier Dashboard', icon: <Receipt className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER'] },
-    { to: '/orders', label: 'Order Management', icon: <ListOrdered className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'WAITER', 'KITCHEN'] },
-    { to: '/tables', label: 'Table Management', icon: <UtensilsCrossed className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'WAITER'] },
-    { to: '/menu', label: 'Menu Management', icon: <BookOpen className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'WAITER', 'KITCHEN'] },
+    { to: '/orders', label: 'Order Management', icon: <ListOrdered className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'KITCHEN'] },
+    { to: '/tables', label: 'Table Management', icon: <UtensilsCrossed className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER'] },
+    { to: '/menu', label: 'Menu Management', icon: <BookOpen className="w-4 h-4" />, roles: ['ADMIN', 'CASHIER', 'KITCHEN'] },
     { to: '/users', label: 'Staff Management', icon: <Users className="w-4 h-4" />, roles: ['ADMIN'] },
     { to: '/analytics', label: 'Revenue & Reports', icon: <BarChart3 className="w-4 h-4" />, roles: ['ADMIN'] },
   ];
@@ -67,9 +67,6 @@ export const Navbar: React.FC = () => {
         case 'KITCHEN':
           navigate('/kitchen');
           break;
-        case 'WAITER':
-          navigate('/pos');
-          break;
         case 'CASHIER':
           navigate('/billing');
           break;
@@ -88,7 +85,6 @@ export const Navbar: React.FC = () => {
     ADMIN: 'bg-purple-100 text-purple-800 border-purple-200',
     MANAGER: 'bg-blue-100 text-blue-800 border-blue-200',
     CASHIER: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-    WAITER: 'bg-amber-100 text-amber-800 border-amber-200',
     KITCHEN: 'bg-orange-100 text-orange-800 border-orange-200',
   };
 
@@ -234,10 +230,9 @@ export const Navbar: React.FC = () => {
             {switchError && <p className="text-xs text-red-600 font-semibold text-center">{switchError}</p>}
           </div>
 
-          <div className="grid grid-cols-4 gap-2 pt-2 text-center text-[10px] text-stone-500 font-mono">
+          <div className="grid grid-cols-3 gap-2 pt-2 text-center text-[10px] text-stone-500 font-mono">
             <span className="p-1 bg-stone-100 rounded">Admin: 1111</span>
             <span className="p-1 bg-stone-100 rounded">Cashier: 3333</span>
-            <span className="p-1 bg-stone-100 rounded">Waiter: 4444</span>
             <span className="p-1 bg-stone-100 rounded">Kitchen: 5555</span>
           </div>
 

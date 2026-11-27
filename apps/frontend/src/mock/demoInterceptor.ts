@@ -129,7 +129,7 @@ export function initDemoInterceptor() {
         user = store.users.find((u: any) => u.role === 'ADMIN');
       }
       if (!user) {
-        return makeRes({ success: false, error: 'Invalid PIN code. Try 1111 (Admin), 3333 (Cashier), 4444 (Waiter), or 5555 (Kitchen).' }, 401);
+        return makeRes({ success: false, error: 'Invalid PIN code. Try 1111 (Admin), 3333 (Cashier), or 5555 (Kitchen).' }, 401);
       }
       return makeRes({
         success: true,

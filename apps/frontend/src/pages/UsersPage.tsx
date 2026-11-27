@@ -35,7 +35,7 @@ export const UsersPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'ADMIN' | 'MANAGER' | 'CASHIER' | 'WAITER' | 'KITCHEN'>('WAITER');
+  const [role, setRole] = useState<'ADMIN' | 'MANAGER' | 'CASHIER' | 'WAITER' | 'KITCHEN'>('CASHIER');
   const [pinCode, setPinCode] = useState('');
   const [phone, setPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -237,10 +237,9 @@ export const UsersPage: React.FC = () => {
               onChange={(e) => setRole(e.target.value as any)}
               className="w-full bg-white border border-stone-200 rounded-xl py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-rollify-red"
             >
-              <option value="WAITER">WAITER (Floor Ordering & Service)</option>
               <option value="CASHIER">CASHIER (POS Billing & Payments)</option>
               <option value="KITCHEN">KITCHEN (Kitchen Display System)</option>
-              <option value="ADMIN">ADMIN (Full Cafe Management)</option>
+              <option value="ADMIN">ADMIN (Full Management)</option>
             </select>
           </div>
           <Input

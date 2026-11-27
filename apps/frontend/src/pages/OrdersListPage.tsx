@@ -270,7 +270,7 @@ export const OrdersListPage: React.FC = () => {
             Live Order Management
           </h1>
           <p className="text-xs text-stone-500 mt-1">
-            Real-time synchronized order stream across Waiter, Kitchen, and Cashier terminals
+            Real-time synchronized order stream across Kitchen and Cashier terminals
           </p>
         </div>
 

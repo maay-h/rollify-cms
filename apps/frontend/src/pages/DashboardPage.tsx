@@ -182,44 +182,23 @@ export const DashboardPage: React.FC = () => {
             >
               Take New Order
             </Button>
-            {user?.role === 'WAITER' ? (
-              <>
-                <Button
-                  variant="outline"
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                  onClick={() => navigate('/orders')}
-                >
-                  Live Orders
-                </Button>
-                <Button
-                  variant="outline"
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                  onClick={() => navigate('/tables')}
-                >
-                  Table Floor Plan
-                </Button>
-              </>
-            ) : (
-              <>
-                {['ADMIN', 'KITCHEN'].includes(user?.role || '') && (
-                  <Button
-                    variant="outline"
-                    className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                    onClick={() => navigate('/kitchen')}
-                  >
-                    Kitchen Display (KDS)
-                  </Button>
-                )}
-                {['ADMIN', 'CASHIER'].includes(user?.role || '') && (
-                  <Button
-                    variant="outline"
-                    className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                    onClick={() => navigate('/billing')}
-                  >
-                    Billing & Cashier
-                  </Button>
-                )}
-              </>
+            {['ADMIN', 'KITCHEN'].includes(user?.role || '') && (
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                onClick={() => navigate('/kitchen')}
+              >
+                Kitchen Display (KDS)
+              </Button>
+            )}
+            {['ADMIN', 'CASHIER'].includes(user?.role || '') && (
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                onClick={() => navigate('/billing')}
+              >
+                Billing & Cashier
+              </Button>
             )}
           </div>
         </div>
@@ -349,7 +328,7 @@ export const DashboardPage: React.FC = () => {
                   {stats.orderCounts.created} Active
                 </Badge>
                 <h3 className="text-xs font-bold text-blue-900">New Order</h3>
-                <p className="text-[10px] text-blue-600 mt-1">Waiter / QR Placed</p>
+                <p className="text-[10px] text-blue-600 mt-1">QR / Counter Placed</p>
               </div>
 
               <div className="p-3 bg-amber-50 border border-amber-200/60 rounded-2xl">
@@ -490,7 +469,7 @@ export const DashboardPage: React.FC = () => {
               icon: <ListOrdered className="w-4 h-4" />,
               color: 'bg-blue-50 text-blue-700 group-hover:scale-110',
               borderColor: 'hover:border-blue-300',
-              roles: ['ADMIN', 'CASHIER', 'WAITER', 'KITCHEN'],
+              roles: ['ADMIN', 'CASHIER', 'KITCHEN'],
             },
             {
               to: '/tables',
@@ -499,7 +478,7 @@ export const DashboardPage: React.FC = () => {
               icon: <UtensilsCrossed className="w-4 h-4" />,
               color: 'bg-stone-100 text-stone-700 group-hover:scale-110',
               borderColor: 'hover:border-stone-400',
-              roles: ['ADMIN', 'CASHIER', 'WAITER'],
+              roles: ['ADMIN', 'CASHIER'],
             },
             {
               to: '/menu',
@@ -513,7 +492,7 @@ export const DashboardPage: React.FC = () => {
             {
               to: '/users',
               title: 'Staff Management',
-              desc: 'Admin, Cashier, Waiter, Kitchen Staff',
+              desc: 'Admin, Cashier, Kitchen Staff',
               icon: <Users className="w-4 h-4" />,
               color: 'bg-indigo-50 text-indigo-700 group-hover:scale-110',
               borderColor: 'hover:border-indigo-300',
